@@ -6,4 +6,7 @@ workflow "Main" {
 action "cedrickring/golang-action@1.3.0" {
   uses = "cedrickring/golang-action@1.3.0"
   args = "go get -v && go test ./..."
+  env = {
+    GO111MODULE = "on"
+  }
 }
