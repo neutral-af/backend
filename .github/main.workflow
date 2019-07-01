@@ -43,7 +43,9 @@ action "gcloud login" {
 }
 
 action "gcloud run deploy" {
-  uses = "actions/gcloud/cli@ba93088eb19c4a04638102a838312bb32de0b052"
+  # uses = "actions/gcloud/cli@ba93088eb19c4a04638102a838312bb32de0b052"
+  # TODO: revert to upstream when version is updated: https://github.com/actions/gcloud/pull/12
+  uses = "g-harel/gcloud/cli@v248"
   needs = ["docker push"]
   args = "beta run deploy --quiet --image gcr.io/carbonoffsets/backend --project carbonoffsets --platform managed --region us-central1 backend"
 }
