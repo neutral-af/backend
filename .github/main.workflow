@@ -45,5 +45,5 @@ action "gcloud login" {
 action "gcloud run deploy" {
   uses = "actions/gcloud/cli@ba93088eb19c4a04638102a838312bb32de0b052"
   needs = ["docker push"]
-  args = "beta run deploy --image gcr.io/carbonoffsets/backend --project carbonoffsets --platform managed"
+  args = "beta run deploy --quiet --image gcr.io/carbonoffsets/backend --project carbonoffsets --platform managed"
 }
