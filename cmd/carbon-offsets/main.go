@@ -14,7 +14,6 @@ func main() {
 	emissions := emissions.FlightCarbon(distance)
 	x, err := cloverly.Estimate(emissions)
 	if err != nil {
-		fmt.Println("error!")
 		log.Panic(err)
 	}
 	fmt.Printf("%+v\n", x)
