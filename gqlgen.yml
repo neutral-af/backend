@@ -1,0 +1,16 @@
+schema:
+- schema/schema.graphql
+# - schema/estimate.graphql
+exec:
+  filename: lib/schema/generated/generated.go
+model:
+  filename: lib/schema/generated/models_gen.go
+resolver:
+  filename: lib/schema/resolver.go
+  type: Resolver
+autobind: []
+models:
+  FlightEstimate:
+    fields:
+      fromAirports:
+        resolver: true
