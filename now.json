@@ -3,5 +3,8 @@
     "name": "backend",
     "builds": [
         { "src": "cmd/zeit/handler.go", "use": "@now/go" }
-    ]
+    ],
+    "env": {
+        "CLOVERLY_API_KEY": "@cloverly_api_key"
+    }
 }
