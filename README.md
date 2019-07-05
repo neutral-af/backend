@@ -28,4 +28,6 @@ When the schema changes, the generated Go types need to be updated as well. Afte
 
     make deps
 
+## Config & Credentials
 
+The environment variables required are specified in [config.go](lib/config/config.go). They need to be either exported in the environment or provided in a dotenv file.

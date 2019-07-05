@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 
+	"github.com/jasongwartz/carbon-offset-backend/lib/config"
 	"github.com/levigross/grequests"
 )
 
@@ -84,7 +84,8 @@ func Estimate(carbon float64) (Response, error) {
 	if err != nil {
 		return Response{}, err
 	}
-	key := os.Getenv("CLOVERLY_API_KEY")
+
+	key := config.C.CloverlyAPIKey
 
 	resp, err := grequests.Post(url, &grequests.RequestOptions{
 		Headers: map[string]string{
