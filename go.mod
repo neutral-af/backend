@@ -11,7 +11,6 @@ require (
 	github.com/levigross/grequests v0.0.0-20190130132859-37c80f76a0da
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mmcloughlin/openflights v0.0.0-20170819211133-257f09e6e50c
-	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
 	github.com/vektah/gqlparser v1.1.2
 	github.com/ziutek/mymysql v1.5.4 // indirect

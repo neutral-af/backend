@@ -201,11 +201,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema/schema.graphql", Input: `type Query {
-    health: Boolean!
-    flightEstimate: FlightEstimate
-}
-
+	&ast.Source{Name: "schema/estimate.graphql", Input: `
 type FlightEstimate {
     fromAirports(departure: String!, arrival: String!): EstimateResponse
     # fromFlightNumber(flightNumber: String!, date: String!): EstimateResponse
@@ -228,6 +224,11 @@ type EstimateResponse {
     carbon: Float
     details: String # json blob
 }`},
+	&ast.Source{Name: "schema/schema.graphql", Input: `type Query {
+    health: Boolean!
+    flightEstimate: FlightEstimate
+}
+`},
 )
 
 // endregion ************************** generated!.gotpl **************************
