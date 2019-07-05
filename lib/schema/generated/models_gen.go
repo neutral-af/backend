@@ -9,7 +9,7 @@ import (
 )
 
 type EstimateResponse struct {
-	Price   *int     `json:"price"`
+	Price   *Price   `json:"price"`
 	Carbon  *float64 `json:"carbon"`
 	Details *string  `json:"details"`
 }
@@ -21,6 +21,11 @@ type FlightEstimate struct {
 type FromAirportsRequest struct {
 	Departure string `json:"departure"`
 	Arrival   string `json:"arrival"`
+}
+
+type Price struct {
+	Currency *Currency `json:"currency"`
+	Cents    *int      `json:"cents"`
 }
 
 type Currency string

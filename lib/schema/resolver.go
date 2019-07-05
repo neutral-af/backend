@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/jasongwartz/carbon-offset-backend/lib/cloverly"
+	"github.com/jasongwartz/carbon-offset-backend/lib/currency"
 	"github.com/jasongwartz/carbon-offset-backend/lib/distance"
 	"github.com/jasongwartz/carbon-offset-backend/lib/emissions"
 	"github.com/jasongwartz/carbon-offset-backend/lib/schema/generated"
@@ -18,6 +19,10 @@ func (r *Resolver) Query() generated.QueryResolver {
 
 func (r *Resolver) FlightEstimate() generated.FlightEstimateResolver {
 	return &flightEstimateResolver{r}
+}
+
+func (r *Resolver) EstimateResponse() generated.EstimateResponseResolver {
+	return &estimateResponseResolver{r}
 }
 
 type queryResolver struct{ *Resolver }
@@ -40,7 +45,6 @@ func (r *flightEstimateResolver) FromAirports(ctx context.Context, f *generated.
 		return nil, err
 	}
 
-	// currency := "USD"
 	detailsBytes, err := json.Marshal(estimate)
 	details := string(detailsBytes)
 
@@ -49,8 +53,27 @@ func (r *flightEstimateResolver) FromAirports(ctx context.Context, f *generated.
 	}
 
 	return &generated.EstimateResponse{
-		Price:   &estimate.TotalCostInUSDCents,
+		Price: &generated.Price{
+			Cents: &estimate.TotalCostInUSDCents, // This value should get rewritten into a local currency below
+		},
 		Carbon:  &estimate.EquivalentCarbonInKG,
 		Details: &details,
 	}, nil
+}
+
+type estimateResponseResolver struct{ *Resolver }
+
+func (r *estimateResponseResolver) Price(ctx context.Context, e *generated.EstimateResponse, inputCurrency *generated.Currency) (*generated.Price, error) {
+	localCents, err := currency.ConvertFromUSD(*e.Price.Cents, string(*inputCurrency))
+	if err != nil {
+		return &generated.Price{}, err
+	}
+
+	centsPtr := &localCents
+	priceOut := &generated.Price{
+		Cents:    centsPtr,
+		Currency: inputCurrency,
+	}
+
+	return priceOut, nil
 }

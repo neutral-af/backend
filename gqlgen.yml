@@ -14,3 +14,7 @@ models:
     fields:
       fromAirports:
         resolver: true
+  EstimateResponse:
+    fields:
+      price:
+        resolver: true

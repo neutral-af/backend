@@ -34,6 +34,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	EstimateResponse() EstimateResponseResolver
 	FlightEstimate() FlightEstimateResolver
 	Query() QueryResolver
 }
@@ -57,12 +58,20 @@ type ComplexityRoot struct {
 		Departure func(childComplexity int) int
 	}
 
+	Price struct {
+		Cents    func(childComplexity int) int
+		Currency func(childComplexity int) int
+	}
+
 	Query struct {
 		FlightEstimate func(childComplexity int) int
 		Health         func(childComplexity int) int
 	}
 }
 
+type EstimateResponseResolver interface {
+	Price(ctx context.Context, obj *EstimateResponse, currency *Currency) (*Price, error)
+}
 type FlightEstimateResolver interface {
 	FromAirports(ctx context.Context, obj *FlightEstimate, departure string, arrival string) (*EstimateResponse, error)
 }
@@ -137,6 +146,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FromAirportsRequest.Departure(childComplexity), true
+
+	case "Price.cents":
+		if e.complexity.Price.Cents == nil {
+			break
+		}
+
+		return e.complexity.Price.Cents(childComplexity), true
+
+	case "Price.currency":
+		if e.complexity.Price.Currency == nil {
+			break
+		}
+
+		return e.complexity.Price.Currency(childComplexity), true
 
 	case "Query.flightEstimate":
 		if e.complexity.Query.FlightEstimate == nil {
@@ -220,9 +243,14 @@ enum Currency {
 }
 
 type EstimateResponse {
-    price(currency: Currency = USD): Int # TODO: handle multiple currencies
+    price(currency: Currency = USD): Price
     carbon: Float
     details: String # json blob
+}
+
+type Price {
+    currency: Currency
+    cents: Int
 }`},
 	&ast.Source{Name: "schema/schema.graphql", Input: `type Query {
     health: Boolean!
@@ -334,7 +362,7 @@ func (ec *executionContext) _EstimateResponse_price(ctx context.Context, field g
 		Object:   "EstimateResponse",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -347,7 +375,7 @@ func (ec *executionContext) _EstimateResponse_price(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Price, nil
+		return ec.resolvers.EstimateResponse().Price(rctx, obj, args["currency"].(*Currency))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -356,10 +384,10 @@ func (ec *executionContext) _EstimateResponse_price(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*Price)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOPrice2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐPrice(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _EstimateResponse_carbon(ctx context.Context, field graphql.CollectedField, obj *EstimateResponse) (ret graphql.Marshaler) {
@@ -543,6 +571,74 @@ func (ec *executionContext) _FromAirportsRequest_arrival(ctx context.Context, fi
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Price_currency(ctx context.Context, field graphql.CollectedField, obj *Price) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Price",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Currency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Currency)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOCurrency2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐCurrency(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Price_cents(ctx context.Context, field graphql.CollectedField, obj *Price) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Price",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cents, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1862,7 +1958,16 @@ func (ec *executionContext) _EstimateResponse(ctx context.Context, sel ast.Selec
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EstimateResponse")
 		case "price":
-			out.Values[i] = ec._EstimateResponse_price(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EstimateResponse_price(ctx, field, obj)
+				return res
+			})
 		case "carbon":
 			out.Values[i] = ec._EstimateResponse_carbon(ctx, field, obj)
 		case "details":
@@ -1932,6 +2037,32 @@ func (ec *executionContext) _FromAirportsRequest(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var priceImplementors = []string{"Price"}
+
+func (ec *executionContext) _Price(ctx context.Context, sel ast.SelectionSet, obj *Price) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, priceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Price")
+		case "currency":
+			out.Values[i] = ec._Price_currency(ctx, field, obj)
+		case "cents":
+			out.Values[i] = ec._Price_cents(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2610,6 +2741,17 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return ec.marshalOInt2int(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOPrice2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐPrice(ctx context.Context, sel ast.SelectionSet, v Price) graphql.Marshaler {
+	return ec._Price(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOPrice2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐPrice(ctx context.Context, sel ast.SelectionSet, v *Price) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Price(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

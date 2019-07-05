@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -31,6 +30,4 @@ func init() {
 	}
 
 	viper.Unmarshal(&C)
-	fmt.Println(viper.AllSettings())
-	fmt.Println(C)
 }
