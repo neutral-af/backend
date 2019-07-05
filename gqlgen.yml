@@ -1,5 +1,6 @@
 schema:
 - schema/schema.graphql
+- schema/globals.graphql
 - schema/estimate.graphql
 exec:
   filename: lib/schema/generated/generated.go

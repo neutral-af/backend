@@ -235,17 +235,17 @@ type FromAirportsRequest {
     arrival: String!
 }
 
-enum Currency {
-  USD
-  EUR
-  GBP
-  CAD
-}
-
 type EstimateResponse {
     price(currency: Currency = USD): Price
     carbon: Float
     details: String # json blob
+}
+`},
+	&ast.Source{Name: "schema/globals.graphql", Input: `enum Currency {
+  USD
+  EUR
+  GBP
+  CAD
 }
 
 type Price {
