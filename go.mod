@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.9.1
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/h2non/gock v0.0.0-00010101000000-000000000000
 	github.com/kellydunn/golang-geo v0.7.0
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect
 	github.com/levigross/grequests v0.0.0-20190130132859-37c80f76a0da
@@ -18,3 +19,5 @@ require (
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 )
+
+replace github.com/h2non/gock => gopkg.in/h2non/gock.v1 v1.0.15
