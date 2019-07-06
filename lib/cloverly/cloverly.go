@@ -10,20 +10,18 @@ import (
 )
 
 type Cloverly struct {
-	opts CloverlyOpts
-}
-
-type CloverlyOpts struct {
 	baseURL string
 	apiKey  string
 }
 
-func New(opts CloverlyOpts) Cloverly {
-	if opts.baseURL == "" {
-		opts.baseURL = "https://api.cloverly.app/2019-03-beta"
-	}
+type CloverlyOpts struct {
+}
 
-	return Cloverly{opts: opts}
+func New(apiKey string) Cloverly {
+	return Cloverly{
+		apiKey:  apiKey,
+		baseURL: "https://api.cloverly.app/2019-03-beta",
+	}
 }
 
 // Estimate creates a Cloverly estimate for the given volume of carbon
@@ -40,10 +38,10 @@ func (c *Cloverly) Estimate(carbon float64) (Response, error) {
 		return Response{}, err
 	}
 
-	resp, err := grequests.Post(c.opts.baseURL+path, &grequests.RequestOptions{
+	resp, err := grequests.Post(c.baseURL+path, &grequests.RequestOptions{
 		Headers: map[string]string{
 			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("Bearer private_key:%s", c.opts.apiKey),
+			"Authorization": fmt.Sprintf("Bearer private_key:%s", c.apiKey),
 		},
 		RequestBody: data,
 	})

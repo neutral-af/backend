@@ -18,9 +18,8 @@ func TestSimple(t *testing.T) {
 		Reply(200).
 		JSON(map[string]string{"slug": "test"})
 
-	c := New(CloverlyOpts{
-		baseURL: mockUrl,
-	})
+	c := New("mock_key")
+	c.baseURL = mockUrl
 
 	resp, err := c.Estimate(6000)
 	assert.NoError(t, err)
