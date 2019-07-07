@@ -4,7 +4,12 @@
     "builds": [
         { "src": "cmd/zeit/handler.go", "use": "@now/go" }
     ],
+    "routes": [
+        { "src": "/graphql", "dest": "cmd/zeit/handler.go" }
+    ],
     "env": {
         "CLOVERLY_API_KEY": "@cloverly_api_key"
-    }
+    },
+    "regions": ["bru", "yul"],
+    "public": false
 }
