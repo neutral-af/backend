@@ -2,6 +2,7 @@ schema:
 - schema/schema.graphql
 - schema/globals.graphql
 - schema/estimate.graphql
+- schema/purchase.graphql
 exec:
   filename: lib/schema/generated/generated.go
 model:
@@ -9,13 +10,16 @@ model:
 resolver:
   filename: lib/schema/resolver.go
   type: Resolver
-autobind: []
 models:
   FlightEstimate:
     fields:
       fromAirports:
         resolver: true
-  EstimateResponse:
+  Estimate:
     fields:
       price:
+        resolver: true
+  MakePurchase:
+    fields:
+      fromEstimate:
         resolver: true

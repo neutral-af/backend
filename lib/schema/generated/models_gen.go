@@ -8,24 +8,42 @@ import (
 	"strconv"
 )
 
-type EstimateResponse struct {
-	Price   *Price   `json:"price"`
-	Carbon  *float64 `json:"carbon"`
-	Details *string  `json:"details"`
+type Estimate struct {
+	ID       string    `json:"id"`
+	Price    *Price    `json:"price"`
+	Provider *Provider `json:"provider"`
+	Carbon   *float64  `json:"carbon"`
+	Details  *string   `json:"details"`
+}
+
+type EstimateOptions struct {
+	Provider *Provider `json:"provider"`
 }
 
 type FlightEstimate struct {
-	FromAirports *EstimateResponse `json:"fromAirports"`
+	FromAirports *Estimate `json:"fromAirports"`
 }
 
-type FromAirportsRequest struct {
-	Departure string `json:"departure"`
-	Arrival   string `json:"arrival"`
+type MakePurchase struct {
+	FromEstimate *Purchase `json:"fromEstimate"`
 }
 
 type Price struct {
-	Currency *Currency `json:"currency"`
-	Cents    *int      `json:"cents"`
+	Currency  *Currency       `json:"currency"`
+	Cents     *int            `json:"cents"`
+	Breakdown []*PriceElement `json:"breakdown"`
+}
+
+type PriceElement struct {
+	Name    string   `json:"name"`
+	Cents   *int     `json:"cents"`
+	Percent *float64 `json:"percent"`
+}
+
+type Purchase struct {
+	ID      string  `json:"id"`
+	Carbon  float64 `json:"carbon"`
+	Details *string `json:"details"`
 }
 
 type Currency string
@@ -70,5 +88,46 @@ func (e *Currency) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Currency) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type Provider string
+
+const (
+	ProviderCloverly      Provider = "Cloverly"
+	ProviderDigitalHumani Provider = "DigitalHumani"
+)
+
+var AllProvider = []Provider{
+	ProviderCloverly,
+	ProviderDigitalHumani,
+}
+
+func (e Provider) IsValid() bool {
+	switch e {
+	case ProviderCloverly, ProviderDigitalHumani:
+		return true
+	}
+	return false
+}
+
+func (e Provider) String() string {
+	return string(e)
+}
+
+func (e *Provider) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Provider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Provider", str)
+	}
+	return nil
+}
+
+func (e Provider) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
