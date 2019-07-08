@@ -1,32 +1,169 @@
 package currency
 
 import (
+	"errors"
 	"testing"
+	"time"
 
+	"github.com/h2non/gock"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCovertFromUSD(t *testing.T) {
-	fetcher = func() (map[string]float64, error) {
-		return map[string]float64{
-			"USD": 1.0,
-			"CAD": 1.5,
-			"EUR": 0.8,
-		}, nil
+func TestRefreshRates(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("https://api.exchangeratesapi.io").
+		Get("/latest").
+		Reply(200).
+		JSON(struct {
+			Rates map[string]float64
+		}{
+			map[string]float64{
+				"EUR": 1.3,
+			},
+		})
+
+	results, err := refreshRates("USD")
+
+	assert.NoError(t, err)
+	assert.Contains(t, results, "EUR")
+
+	assert.True(t, gock.IsDone())
+}
+
+func TestRefreshRatesError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("https://api.exchangeratesapi.io").
+		Get("/latest").
+		Reply(500).
+		SetError(errors.New("simulated error"))
+
+	results, err := refreshRates("USD")
+
+	assert.Error(t, err)
+	assert.NotContains(t, results, "EUR")
+
+	assert.True(t, gock.IsDone())
+}
+
+func TestRefreshRatesBadJSON(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("https://api.exchangeratesapi.io").
+		Get("/latest").
+		Reply(200).
+		BodyString(`malformed json`)
+
+	results, err := refreshRates("USD")
+
+	assert.Error(t, err)
+	assert.NotContains(t, results, "EUR")
+
+	assert.True(t, gock.IsDone())
+}
+
+func TestExchangeCache(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("*").Reply(500).SetError(errors.New("shouldn't have made this request!"))
+
+	testExchanger := currencyExchanger{
+		rates: map[string]rateCache{
+			"USD": rateCache{
+				values: map[string]float64{
+					"EUR": 1.3,
+				},
+				expiry: time.Now().Add(time.Hour),
+			},
+		},
 	}
 
-	usd := 150
-	result, err := ConvertFromUSD(usd, "USD")
+	cents, err := testExchanger.exchange(200, "USD", "EUR")
 	assert.NoError(t, err)
-	assert.Equal(t, usd, result)
+	assert.NotZero(t, cents)
 
-	// Test that euros are worth more than dollars
-	result, err = ConvertFromUSD(usd, "EUR")
-	assert.NoError(t, err)
-	assert.Greater(t, usd, result)
+	// Make sure the http request wasn't made (and intercepted)
+	assert.True(t, gock.IsPending())
+}
 
-	// Test that Canadian dollars are less than USD
-	result, err = ConvertFromUSD(usd, "CAD")
+func TestExchangeUpdate(t *testing.T) {
+	defer gock.Off()
+
+	testExchanger := currencyExchanger{
+		rates: map[string]rateCache{},
+	}
+
+	exchangeAmount := 200
+	exchangeRate := 1.3
+
+	gock.New("https://api.exchangeratesapi.io").
+		Get("/latest").
+		Reply(200).
+		JSON(struct {
+			Rates map[string]float64
+		}{
+			map[string]float64{
+				"EUR": exchangeRate,
+			},
+		})
+
+	cents, err := testExchanger.exchange(exchangeAmount, "USD", "EUR")
 	assert.NoError(t, err)
-	assert.Less(t, usd, result)
+	assert.Equal(t, int(float64(exchangeAmount)*exchangeRate), cents)
+
+	assert.True(t, gock.IsDone())
+}
+
+func TestExchangeUpdateError(t *testing.T) {
+	defer gock.Off()
+
+	testExchanger := currencyExchanger{
+		rates: map[string]rateCache{},
+	}
+
+	gock.New("https://api.exchangeratesapi.io").
+		Get("/latest").
+		Reply(200).
+		SetError(errors.New("unexpected error"))
+
+	cents, err := testExchanger.exchange(100, "USD", "EUR")
+	assert.Error(t, err)
+	assert.Zero(t, cents)
+
+	assert.True(t, gock.IsDone())
+}
+
+func TestCovertFromUSDNoop(t *testing.T) {
+	defer gock.Off()
+	gock.New("*").Reply(500).SetError(errors.New("shouldn't have made this request!"))
+
+	cents, err := ConvertFromUSD(100, "USD")
+	assert.NoError(t, err)
+	assert.NotZero(t, cents)
+
+	assert.True(t, gock.IsPending())
+}
+
+func TestConvertFromUSD(t *testing.T) {
+	defer gock.Off()
+	gock.New("*").Reply(500).SetError(errors.New("shouldn't have made this request!"))
+
+	exchanger = currencyExchanger{
+		rates: map[string]rateCache{
+			"USD": rateCache{
+				values: map[string]float64{
+					"EUR": 1.3,
+				},
+				expiry: time.Now().Add(time.Hour),
+			},
+		},
+	}
+
+	cents, err := ConvertFromUSD(200, "EUR")
+	assert.NoError(t, err)
+	assert.NotZero(t, cents)
+	assert.Equal(t, 260, cents)
+
+	assert.True(t, gock.IsPending())
 }

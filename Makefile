@@ -15,3 +15,6 @@ deps:
 	go get -v
 	go mod tidy
 	gqlgen
+
+deploy:
+	now
