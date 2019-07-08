@@ -15,6 +15,10 @@ type config struct {
 var C config
 
 func init() {
+	C = New()
+}
+
+func New() config {
 	if _, err := os.Stat(".env"); err == nil {
 		viper.SetConfigFile(".env")
 		viper.SetConfigType("dotenv")
@@ -29,5 +33,7 @@ func init() {
 		}
 	}
 
-	viper.Unmarshal(&C)
+	var c config
+	viper.Unmarshal(&c)
+	return c
 }
