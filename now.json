@@ -9,7 +9,8 @@
     ],
     "env": {
         "CLOVERLY_API_KEY": "@cloverly_api_key",
-        "HONEYCOMB_API_KEY": "@honeycomb_api_key"
+        "HONEYCOMB_API_KEY": "@honeycomb_api_key",
+        "PAYMENTS_BASE_URL": "https://frontend.jasongwartz.now.sh/payments/"
     },
     "regions": ["bru"],
     "public": false

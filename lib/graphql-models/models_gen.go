@@ -36,9 +36,10 @@ type MakePurchase struct {
 }
 
 type Price struct {
-	Currency  Currency        `json:"currency"`
-	Cents     int             `json:"cents"`
-	Breakdown []*PriceElement `json:"breakdown"`
+	Currency   Currency        `json:"currency"`
+	Cents      int             `json:"cents"`
+	Breakdown  []*PriceElement `json:"breakdown"`
+	PaymentURL *string         `json:"paymentURL"`
 }
 
 type PriceElement struct {

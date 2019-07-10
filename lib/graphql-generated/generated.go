@@ -67,9 +67,10 @@ type ComplexityRoot struct {
 	}
 
 	Price struct {
-		Breakdown func(childComplexity int) int
-		Cents     func(childComplexity int) int
-		Currency  func(childComplexity int) int
+		Breakdown  func(childComplexity int) int
+		Cents      func(childComplexity int) int
+		Currency   func(childComplexity int) int
+		PaymentURL func(childComplexity int) int
 	}
 
 	PriceElement struct {
@@ -213,6 +214,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Price.Currency(childComplexity), true
+
+	case "Price.paymentURL":
+		if e.complexity.Price.PaymentURL == nil {
+			break
+		}
+
+		return e.complexity.Price.PaymentURL(childComplexity), true
 
 	case "PriceElement.cents":
 		if e.complexity.PriceElement.Cents == nil {
@@ -368,6 +376,7 @@ type Price {
     currency: Currency!
     cents: Int!
     breakdown: [PriceElement]
+    paymentURL: String
 }
 
 type PriceElement {
@@ -914,6 +923,40 @@ func (ec *executionContext) _Price_breakdown(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOPriceElement2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Price_paymentURL(ctx context.Context, field graphql.CollectedField, obj *models.Price) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Price",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PaymentURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PriceElement_name(ctx context.Context, field graphql.CollectedField, obj *models.PriceElement) (ret graphql.Marshaler) {
@@ -2659,6 +2702,8 @@ func (ec *executionContext) _Price(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "breakdown":
 			out.Values[i] = ec._Price_breakdown(ctx, field, obj)
+		case "paymentURL":
+			out.Values[i] = ec._Price_paymentURL(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

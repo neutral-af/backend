@@ -48,6 +48,8 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 			return nil, err
 		}
 
+		beeline.AddField(ctx, "estimateID", estimate.Slug)
+
 		detailsBytes, err := json.Marshal(estimate)
 		details := string(detailsBytes)
 		if err != nil {
