@@ -3,7 +3,7 @@ package currency
 import (
 	"time"
 
-	"github.com/jasongwartz/carbon-offset-backend/lib/schema/generated"
+	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 	"github.com/levigross/grequests"
 	"github.com/pkg/errors"
 )
@@ -24,19 +24,22 @@ type currencyExchanger struct {
 	rates map[string]rateCache
 }
 
-func (c *currencyExchanger) exchange(cents int, fromCurrency string, toCurrency string) (int, error) {
-	if c.rates[fromCurrency].expiry.Before(time.Now()) {
-		updatedRates, err := refreshRates(fromCurrency)
+func (c *currencyExchanger) exchange(cents int, fromCurrency models.Currency, toCurrency models.Currency) (int, error) {
+	from := fromCurrency.String()
+	to := toCurrency.String()
+
+	if c.rates[from].expiry.Before(time.Now()) {
+		updatedRates, err := refreshRates(from)
 		if err != nil {
 			return 0, errors.Wrap(err, "Unable to refresh currency rates cache")
 		}
-		c.rates[fromCurrency] = rateCache{
+		c.rates[from] = rateCache{
 			values: updatedRates,
 			expiry: time.Now().Add(ratesTTL),
 		}
 	}
 
-	result := float64(cents) * c.rates[fromCurrency].values[toCurrency]
+	result := float64(cents) * c.rates[from].values[to]
 	rounded := int(result) // round off the fractions of a cent
 	return rounded, nil
 }
@@ -60,11 +63,19 @@ func refreshRates(baseCurrency string) (map[string]float64, error) {
 	return rates.Rates, nil
 }
 
-func ConvertFromUSD(cents int, currency string) (int, error) {
+func ConvertFromUSD(cents int, currency models.Currency) (int, error) {
 	// Skip conversion if it's already in USD
-	if currency == generated.CurrencyUsd.String() {
+	if currency == models.CurrencyUsd {
 		return cents, nil
 	}
 
 	return exchanger.exchange(cents, "USD", currency)
+}
+
+func Convert(cents int, from models.Currency, to models.Currency) (int, error) {
+	if from == to {
+		return cents, nil
+	}
+
+	return exchanger.exchange(cents, from, to)
 }

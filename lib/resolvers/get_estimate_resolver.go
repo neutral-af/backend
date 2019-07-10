@@ -1,4 +1,4 @@
-package schema
+package resolvers
 
 import (
 	"context"
@@ -9,12 +9,8 @@ import (
 	"github.com/jasongwartz/carbon-offset-backend/lib/config"
 	"github.com/jasongwartz/carbon-offset-backend/lib/distance"
 	"github.com/jasongwartz/carbon-offset-backend/lib/emissions"
-	"github.com/jasongwartz/carbon-offset-backend/lib/schema/generated"
+	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 )
-
-type contextKey string
-
-const contextEstimateKey contextKey = "estimate"
 
 var cloverlyAPI cloverly.Cloverly
 
@@ -24,7 +20,7 @@ func init() {
 
 type getEstimateResolver struct{ *Resolver }
 
-func (r *getEstimateResolver) FromFlights(ctx context.Context, get *generated.GetEstimate, flights []*generated.Flight, options *generated.EstimateOptions) (*generated.Estimate, error) {
+func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error) {
 	totalCarbon := 0.0
 
 	for _, f := range flights {
@@ -39,7 +35,7 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *generated.Ge
 		}
 	}
 
-	if *options.Provider == generated.ProviderCloverly {
+	if *options.Provider == models.ProviderCloverly {
 		estimate, err := cloverlyAPI.Estimate(totalCarbon)
 		if err != nil {
 			return nil, err
@@ -51,14 +47,16 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *generated.Ge
 			return nil, err
 		}
 
-		return &generated.Estimate{
+		return &models.Estimate{
 			ID: estimate.Slug,
-			Price: &generated.Price{
-				Cents: &estimate.TotalCostInUSDCents, // This value should get rewritten into a local currency below
-				Breakdown: []*generated.PriceElement{
-					&generated.PriceElement{
-						Name:  "Cloverly processing fee",
-						Cents: &estimate.TransactionCostInUSDCents,
+			Price: &models.Price{
+				Cents:    estimate.TotalCostInUSDCents, // This value should get rewritten into a local currency below
+				Currency: models.CurrencyUsd,           // This should also get rewritten (based on user-selected currency)
+				Breakdown: []*models.PriceElement{
+					&models.PriceElement{
+						Name:     "Cloverly processing fee",
+						Cents:    estimate.TransactionCostInUSDCents,
+						Currency: models.CurrencyUsd,
 					},
 				},
 			},

@@ -1,8 +1,6 @@
-package schema
+package resolvers
 
-import (
-	"github.com/jasongwartz/carbon-offset-backend/lib/schema/generated"
-)
+import generated "github.com/jasongwartz/carbon-offset-backend/lib/graphql-generated"
 
 type Resolver struct{}
 

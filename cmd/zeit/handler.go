@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/handler"
-	"github.com/jasongwartz/carbon-offset-backend/lib/schema"
-	"github.com/jasongwartz/carbon-offset-backend/lib/schema/generated"
+	generated "github.com/jasongwartz/carbon-offset-backend/lib/graphql-generated"
+	"github.com/jasongwartz/carbon-offset-backend/lib/resolvers"
 )
 
 var graphQLHandler http.HandlerFunc
 
 func init() {
-	graphQLHandler = handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &schema.Resolver{}}))
+	graphQLHandler = handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}}))
 	fmt.Println("Registered graphQL handler")
 }
 

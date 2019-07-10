@@ -4,11 +4,13 @@ schema:
 - schema/estimate.graphql
 - schema/purchase.graphql
 exec:
-  filename: lib/schema/generated/generated.go
+  filename: lib/graphql-generated/generated.go
+  package: generated
 model:
-  filename: lib/schema/generated/models_gen.go
+  filename: lib/graphql-models/models_gen.go
+  package: models
 resolver:
-  filename: lib/schema/resolver.go
+  filename: lib/resolvers/resolver.go
   type: Resolver
 models:
   GetEstimate:

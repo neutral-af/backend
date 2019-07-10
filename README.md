@@ -56,7 +56,21 @@ Estimate from multiple flights, overriding price currency:
                 { departure:"YYZ",arrival:"LHR" },
                 { departure:"LHR",arrival:"YYZ" }
             ]) {
-                price(currency:EUR) { currency, cents } carbon provider
+                price(currency:EUR) { currency, cents } id carbon provider
+            }
+        }
+    }
+
+Estimate showing fees (via cost breakdown):
+
+    {
+        estimate {
+            fromFlights(flights:[
+                {departure:"YYZ",arrival:"LHR"}
+            ]) {
+                carbon
+                provider
+                price(currency:EUR) { currency cents breakdown {name cents currency} }
             }
         }
     }

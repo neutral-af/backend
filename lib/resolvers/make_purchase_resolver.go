@@ -1,18 +1,18 @@
-package schema
+package resolvers
 
 import (
 	"context"
 	"encoding/json"
 
-	"github.com/jasongwartz/carbon-offset-backend/lib/schema/generated"
+	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 )
 
 type makePurchaseResolver struct{ *Resolver }
 
-func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *generated.MakePurchase, estimateID *string, provider *generated.Provider) (*generated.Purchase, error) {
-	var resp *generated.Purchase
+func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *models.MakePurchase, estimateID *string, provider *models.Provider) (*models.Purchase, error) {
+	var resp *models.Purchase
 
-	if *provider == generated.ProviderCloverly {
+	if *provider == models.ProviderCloverly {
 		result, err := cloverlyAPI.Purchase(*estimateID)
 		if err != nil {
 			return nil, err

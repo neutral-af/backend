@@ -6,15 +6,15 @@ enum Currency {
 }
 
 type Price {
-    currency: Currency
-    cents: Int
+    currency: Currency!
+    cents: Int!
     breakdown: [PriceElement]
 }
 
 type PriceElement {
     name: String!
-    cents: Int
-    percent: Float
+    cents: Int!
+    currency: Currency!
 }
 
 enum Provider {
