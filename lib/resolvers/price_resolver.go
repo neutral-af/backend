@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 
+	"github.com/honeycombio/beeline-go"
 	"github.com/jasongwartz/carbon-offset-backend/lib/currency"
 	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 )
@@ -10,7 +11,11 @@ import (
 type estimateResolver struct{ *Resolver }
 
 func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputCurrency *models.Currency) (*models.Price, error) {
+	ctx, span := beeline.StartSpan(ctx, "calculatePrice")
+	defer span.Send()
+
 	userCurrency := *inputCurrency
+	beeline.AddField(ctx, "currency", userCurrency)
 
 	fees := []*models.PriceElement{
 		&models.PriceElement{

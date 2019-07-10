@@ -5,12 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/honeycombio/beeline-go"
 	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 )
 
 type makePurchaseResolver struct{ *Resolver }
 
 func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *models.MakePurchase, estimateID *string, provider *models.Provider) (*models.Purchase, error) {
+	ctx, span := beeline.StartSpan(ctx, "fromEstimate")
+	defer span.Send()
+
+	beeline.AddField(ctx, "provider", *provider)
+
 	resp := &models.Purchase{}
 
 	if *provider == models.ProviderCloverly {

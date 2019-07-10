@@ -5,6 +5,9 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/honeycombio/beeline-go"
+	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
+	"github.com/jasongwartz/carbon-offset-backend/lib/config"
 	generated "github.com/jasongwartz/carbon-offset-backend/lib/graphql-generated"
 	"github.com/jasongwartz/carbon-offset-backend/lib/resolvers"
 )
@@ -12,7 +15,13 @@ import (
 var graphQLHandler http.HandlerFunc
 
 func init() {
-	graphQLHandler = handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}}))
+	beeline.Init(beeline.Config{
+		WriteKey: config.C.HoneycombAPIKey,
+		Dataset:  "carbonara-backend",
+	})
+	// defer beeline.Close()
+
+	graphQLHandler = hnynethttp.WrapHandlerFunc(handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}})))
 	fmt.Println("Registered graphQL handler")
 }
 

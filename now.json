@@ -8,7 +8,8 @@
         { "src": "/graphql", "dest": "cmd/zeit/handler.go" }
     ],
     "env": {
-        "CLOVERLY_API_KEY": "@cloverly_api_key"
+        "CLOVERLY_API_KEY": "@cloverly_api_key",
+        "HONEYCOMB_API_KEY": "@honeycomb_api_key"
     },
     "regions": ["bru"],
     "public": false

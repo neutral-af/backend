@@ -8,7 +8,8 @@ import (
 )
 
 type config struct {
-	CloverlyAPIKey string `mapstructure:"CLOVERLY_API_KEY"`
+	CloverlyAPIKey  string `mapstructure:"CLOVERLY_API_KEY"`
+	HoneycombAPIKey string `mapstructure:"HONEYCOMB_API_KEY"`
 }
 
 // C is the object containing config values
@@ -25,6 +26,7 @@ func New() config {
 	}
 
 	viper.BindEnv("CLOVERLY_API_KEY")
+	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {

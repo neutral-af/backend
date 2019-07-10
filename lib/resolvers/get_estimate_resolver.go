@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/honeycombio/beeline-go"
 	"github.com/jasongwartz/carbon-offset-backend/lib/cloverly"
 	"github.com/jasongwartz/carbon-offset-backend/lib/config"
 	"github.com/jasongwartz/carbon-offset-backend/lib/distance"
@@ -21,6 +22,9 @@ func init() {
 type getEstimateResolver struct{ *Resolver }
 
 func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error) {
+	ctx, span := beeline.StartSpan(ctx, "fromFlights")
+	defer span.Send()
+
 	totalCarbon := 0.0
 
 	for _, f := range flights {
@@ -34,6 +38,9 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 			return nil, errors.New("Invalid flight input: either (departure,arrival) or (flightNumber,date) must be provided")
 		}
 	}
+
+	beeline.AddField(ctx, "provider", *options.Provider)
+	beeline.AddField(ctx, "carbon", totalCarbon)
 
 	if *options.Provider == models.ProviderCloverly {
 		estimate, err := cloverlyAPI.Estimate(totalCarbon)
