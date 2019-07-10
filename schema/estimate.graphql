@@ -1,0 +1,16 @@
+type FlightEstimate {
+    fromAirports(departure: String!, arrival: String!, options: EstimateOptions = {}): Estimate
+    # fromFlightNumber(flightNumber: String!, date: String!): EstimateResponse
+}
+
+type Estimate {
+    id: ID! # The ID can be used to convert an estimate to a purchase
+    price(currency: Currency = USD): Price # Price obj defined in globals
+    provider: Provider
+    carbon: Float # kg CO2
+    details: String # json blob
+}
+
+input EstimateOptions {
+    provider: Provider = Cloverly # Default provider
+}

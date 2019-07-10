@@ -1,0 +1,23 @@
+enum Currency {
+    USD
+    EUR
+    GBP
+    CAD
+}
+
+type Price {
+    currency: Currency
+    cents: Int
+    breakdown: [PriceElement]
+}
+
+type PriceElement {
+    name: String!
+    cents: Int
+    percent: Float
+}
+
+enum Provider {
+    Cloverly        # https://www.cloverly.com/
+    DigitalHumani   # http://digitalhumani.com/
+}

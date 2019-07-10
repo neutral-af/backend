@@ -1,0 +1,8 @@
+type Query {
+    health: Boolean!
+    flightEstimate: FlightEstimate
+}
+
+type Mutation {
+    purchase: MakePurchase
+}
