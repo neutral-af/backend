@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/levigross/grequests"
+	"github.com/pkg/errors"
 )
 
 type Cloverly struct {
@@ -47,6 +48,10 @@ func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Respo
 		return Response{}, err
 	}
 
+	if responseData.Error != "" {
+		return Response{}, errors.Wrap(errors.New(responseData.Error), "Error in Cloverly response")
+	}
+
 	return responseData, nil
 }
 
@@ -76,6 +81,7 @@ func (c *Cloverly) Purchase(estimateID string) (Response, error) {
 
 // Response matches the schema of an estimate or purchase response from Cloverly
 type Response struct {
+	Error                     string  `json:"error"`
 	Slug                      string  `json:"slug"`
 	Environment               string  `json:"environment"`
 	State                     string  `json:"state"`
