@@ -20,8 +20,15 @@ type EstimateOptions struct {
 	Provider *Provider `json:"provider"`
 }
 
-type FlightEstimate struct {
-	FromAirports *Estimate `json:"fromAirports"`
+type Flight struct {
+	Departure    *string `json:"departure"`
+	Arrival      *string `json:"arrival"`
+	FlightNumber *string `json:"flightNumber"`
+	Date         *string `json:"date"`
+}
+
+type GetEstimate struct {
+	FromFlights *Estimate `json:"fromFlights"`
 }
 
 type MakePurchase struct {

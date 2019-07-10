@@ -22,14 +22,25 @@ func init() {
 	cloverlyAPI = cloverly.New(config.C.CloverlyAPIKey)
 }
 
-type flightEstimateResolver struct{ *Resolver }
+type getEstimateResolver struct{ *Resolver }
 
-func (r *flightEstimateResolver) FromAirports(ctx context.Context, f *generated.FlightEstimate, departure string, arrival string, options *generated.EstimateOptions) (*generated.Estimate, error) {
-	distance := distance.TwoAirports(departure, arrival)
-	emissions := emissions.FlightCarbon(distance)
+func (r *getEstimateResolver) FromFlights(ctx context.Context, get *generated.GetEstimate, flights []*generated.Flight, options *generated.EstimateOptions) (*generated.Estimate, error) {
+	totalCarbon := 0.0
+
+	for _, f := range flights {
+		if f.Departure != nil && *f.Departure != "" && f.Arrival != nil && *f.Arrival != "" {
+			distance := distance.TwoAirports(*f.Departure, *f.Arrival)
+			emissions := emissions.FlightCarbon(distance)
+			totalCarbon += emissions
+		} else if f.FlightNumber != nil && *f.FlightNumber != "" && f.Date != nil && *f.Date != "" {
+			return nil, errors.New("Calculating from flight number not yet implemented")
+		} else {
+			return nil, errors.New("Invalid flight input: either (departure,arrival) or (flightNumber,date) must be provided")
+		}
+	}
 
 	if *options.Provider == generated.ProviderCloverly {
-		estimate, err := cloverlyAPI.Estimate(emissions)
+		estimate, err := cloverlyAPI.Estimate(totalCarbon)
 		if err != nil {
 			return nil, err
 		}
@@ -41,6 +52,7 @@ func (r *flightEstimateResolver) FromAirports(ctx context.Context, f *generated.
 		}
 
 		return &generated.Estimate{
+			ID: estimate.Slug,
 			Price: &generated.Price{
 				Cents: &estimate.TotalCostInUSDCents, // This value should get rewritten into a local currency below
 				Breakdown: []*generated.PriceElement{
@@ -57,4 +69,5 @@ func (r *flightEstimateResolver) FromAirports(ctx context.Context, f *generated.
 	}
 
 	return nil, errors.New("Provider not set")
+
 }

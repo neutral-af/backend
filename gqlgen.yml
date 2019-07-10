@@ -11,9 +11,9 @@ resolver:
   filename: lib/schema/resolver.go
   type: Resolver
 models:
-  FlightEstimate:
+  GetEstimate:
     fields:
-      fromAirports:
+      fromFlights:
         resolver: true
   Estimate:
     fields:

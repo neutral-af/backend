@@ -12,6 +12,6 @@ func (r *queryResolver) Health(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
-func (r *queryResolver) FlightEstimate(ctx context.Context) (*generated.FlightEstimate, error) {
-	return &generated.FlightEstimate{}, nil
+func (r *queryResolver) Estimate(ctx context.Context) (*generated.GetEstimate, error) {
+	return &generated.GetEstimate{}, nil
 }

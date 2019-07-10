@@ -35,7 +35,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Estimate() EstimateResolver
-	FlightEstimate() FlightEstimateResolver
+	GetEstimate() GetEstimateResolver
 	MakePurchase() MakePurchaseResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -53,8 +53,8 @@ type ComplexityRoot struct {
 		Provider func(childComplexity int) int
 	}
 
-	FlightEstimate struct {
-		FromAirports func(childComplexity int, departure string, arrival string, options *EstimateOptions) int
+	GetEstimate struct {
+		FromFlights func(childComplexity int, flights []*Flight, options *EstimateOptions) int
 	}
 
 	MakePurchase struct {
@@ -84,16 +84,16 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		FlightEstimate func(childComplexity int) int
-		Health         func(childComplexity int) int
+		Estimate func(childComplexity int) int
+		Health   func(childComplexity int) int
 	}
 }
 
 type EstimateResolver interface {
 	Price(ctx context.Context, obj *Estimate, currency *Currency) (*Price, error)
 }
-type FlightEstimateResolver interface {
-	FromAirports(ctx context.Context, obj *FlightEstimate, departure string, arrival string, options *EstimateOptions) (*Estimate, error)
+type GetEstimateResolver interface {
+	FromFlights(ctx context.Context, obj *GetEstimate, flights []*Flight, options *EstimateOptions) (*Estimate, error)
 }
 type MakePurchaseResolver interface {
 	FromEstimate(ctx context.Context, obj *MakePurchase, estimateID *string, provider *Provider) (*Purchase, error)
@@ -103,7 +103,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (bool, error)
-	FlightEstimate(ctx context.Context) (*FlightEstimate, error)
+	Estimate(ctx context.Context) (*GetEstimate, error)
 }
 
 type executableSchema struct {
@@ -161,17 +161,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Estimate.Provider(childComplexity), true
 
-	case "FlightEstimate.fromAirports":
-		if e.complexity.FlightEstimate.FromAirports == nil {
+	case "GetEstimate.fromFlights":
+		if e.complexity.GetEstimate.FromFlights == nil {
 			break
 		}
 
-		args, err := ec.field_FlightEstimate_fromAirports_args(context.TODO(), rawArgs)
+		args, err := ec.field_GetEstimate_fromFlights_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.FlightEstimate.FromAirports(childComplexity, args["departure"].(string), args["arrival"].(string), args["options"].(*EstimateOptions)), true
+		return e.complexity.GetEstimate.FromFlights(childComplexity, args["flights"].([]*Flight), args["options"].(*EstimateOptions)), true
 
 	case "MakePurchase.fromEstimate":
 		if e.complexity.MakePurchase.FromEstimate == nil {
@@ -255,12 +255,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Purchase.ID(childComplexity), true
 
-	case "Query.flightEstimate":
-		if e.complexity.Query.FlightEstimate == nil {
+	case "Query.estimate":
+		if e.complexity.Query.Estimate == nil {
 			break
 		}
 
-		return e.complexity.Query.FlightEstimate(childComplexity), true
+		return e.complexity.Query.Estimate(childComplexity), true
 
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
@@ -331,9 +331,17 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema/estimate.graphql", Input: `type FlightEstimate {
-    fromAirports(departure: String!, arrival: String!, options: EstimateOptions = {}): Estimate
-    # fromFlightNumber(flightNumber: String!, date: String!): EstimateResponse
+	&ast.Source{Name: "schema/estimate.graphql", Input: `type GetEstimate {
+    fromFlights(flights: [Flight!]!, options: EstimateOptions = {}): Estimate
+}
+
+input Flight {
+    # Either (departure,arrival) or (flightNumber,date) must be provided
+    # TODO: is there a better way to have an optional interface 
+    departure: String
+    arrival: String
+    flightNumber: String
+    date: String
 }
 
 type Estimate {
@@ -382,7 +390,7 @@ type Purchase {
 }`},
 	&ast.Source{Name: "schema/schema.graphql", Input: `type Query {
     health: Boolean!
-    flightEstimate: FlightEstimate
+    estimate: GetEstimate
 }
 
 type Mutation {
@@ -409,33 +417,25 @@ func (ec *executionContext) field_Estimate_price_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_FlightEstimate_fromAirports_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_GetEstimate_fromFlights_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["departure"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 []*Flight
+	if tmp, ok := rawArgs["flights"]; ok {
+		arg0, err = ec.unmarshalNFlight2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlight(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["departure"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["arrival"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["arrival"] = arg1
-	var arg2 *EstimateOptions
+	args["flights"] = arg0
+	var arg1 *EstimateOptions
 	if tmp, ok := rawArgs["options"]; ok {
-		arg2, err = ec.unmarshalOEstimateOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐEstimateOptions(ctx, tmp)
+		arg1, err = ec.unmarshalOEstimateOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐEstimateOptions(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["options"] = arg2
+	args["options"] = arg1
 	return args, nil
 }
 
@@ -691,7 +691,7 @@ func (ec *executionContext) _Estimate_details(ctx context.Context, field graphql
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _FlightEstimate_fromAirports(ctx context.Context, field graphql.CollectedField, obj *FlightEstimate) (ret graphql.Marshaler) {
+func (ec *executionContext) _GetEstimate_fromFlights(ctx context.Context, field graphql.CollectedField, obj *GetEstimate) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -701,14 +701,14 @@ func (ec *executionContext) _FlightEstimate_fromAirports(ctx context.Context, fi
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "FlightEstimate",
+		Object:   "GetEstimate",
 		Field:    field,
 		Args:     nil,
 		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_FlightEstimate_fromAirports_args(ctx, rawArgs)
+	args, err := ec.field_GetEstimate_fromFlights_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -717,7 +717,7 @@ func (ec *executionContext) _FlightEstimate_fromAirports(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.FlightEstimate().FromAirports(rctx, obj, args["departure"].(string), args["arrival"].(string), args["options"].(*EstimateOptions))
+		return ec.resolvers.GetEstimate().FromFlights(rctx, obj, args["flights"].([]*Flight), args["options"].(*EstimateOptions))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1159,7 +1159,7 @@ func (ec *executionContext) _Query_health(ctx context.Context, field graphql.Col
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_flightEstimate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_estimate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1178,7 +1178,7 @@ func (ec *executionContext) _Query_flightEstimate(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().FlightEstimate(rctx)
+		return ec.resolvers.Query().Estimate(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1187,10 +1187,10 @@ func (ec *executionContext) _Query_flightEstimate(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*FlightEstimate)
+	res := resTmp.(*GetEstimate)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOFlightEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlightEstimate(ctx, field.Selections, res)
+	return ec.marshalOGetEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐGetEstimate(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2441,6 +2441,42 @@ func (ec *executionContext) unmarshalInputEstimateOptions(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputFlight(ctx context.Context, obj interface{}) (Flight, error) {
+	var it Flight
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "departure":
+			var err error
+			it.Departure, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "arrival":
+			var err error
+			it.Arrival, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "flightNumber":
+			var err error
+			it.FlightNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "date":
+			var err error
+			it.Date, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2493,18 +2529,18 @@ func (ec *executionContext) _Estimate(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var flightEstimateImplementors = []string{"FlightEstimate"}
+var getEstimateImplementors = []string{"GetEstimate"}
 
-func (ec *executionContext) _FlightEstimate(ctx context.Context, sel ast.SelectionSet, obj *FlightEstimate) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, flightEstimateImplementors)
+func (ec *executionContext) _GetEstimate(ctx context.Context, sel ast.SelectionSet, obj *GetEstimate) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, getEstimateImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("FlightEstimate")
-		case "fromAirports":
+			out.Values[i] = graphql.MarshalString("GetEstimate")
+		case "fromFlights":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2512,7 +2548,7 @@ func (ec *executionContext) _FlightEstimate(ctx context.Context, sel ast.Selecti
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._FlightEstimate_fromAirports(ctx, field, obj)
+				res = ec._GetEstimate_fromFlights(ctx, field, obj)
 				return res
 			})
 		default:
@@ -2709,7 +2745,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "flightEstimate":
+		case "estimate":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2717,7 +2753,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_flightEstimate(ctx, field)
+				res = ec._Query_estimate(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2992,6 +3028,38 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNFlight2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlight(ctx context.Context, v interface{}) (Flight, error) {
+	return ec.unmarshalInputFlight(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNFlight2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlight(ctx context.Context, v interface{}) ([]*Flight, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*Flight, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNFlight2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlight(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNFlight2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlight(ctx context.Context, v interface{}) (*Flight, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNFlight2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlight(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
@@ -3332,17 +3400,6 @@ func (ec *executionContext) unmarshalOEstimateOptions2ᚖgithubᚗcomᚋjasongwa
 	return &res, err
 }
 
-func (ec *executionContext) marshalOFlightEstimate2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlightEstimate(ctx context.Context, sel ast.SelectionSet, v FlightEstimate) graphql.Marshaler {
-	return ec._FlightEstimate(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOFlightEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐFlightEstimate(ctx context.Context, sel ast.SelectionSet, v *FlightEstimate) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._FlightEstimate(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	return graphql.UnmarshalFloat(v)
 }
@@ -3364,6 +3421,17 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOFloat2float64(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOGetEstimate2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v GetEstimate) graphql.Marshaler {
+	return ec._GetEstimate(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOGetEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋschemaᚋgeneratedᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v *GetEstimate) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetEstimate(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {

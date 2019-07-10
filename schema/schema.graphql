@@ -1,6 +1,6 @@
 type Query {
     health: Boolean!
-    flightEstimate: FlightEstimate
+    estimate: GetEstimate
 }
 
 type Mutation {

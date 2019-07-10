@@ -14,12 +14,12 @@ func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
 }
 
-func (r *Resolver) FlightEstimate() generated.FlightEstimateResolver {
-	return &flightEstimateResolver{r}
-}
-
 func (r *Resolver) Estimate() generated.EstimateResolver {
 	return &estimateResolver{r}
+}
+
+func (r *Resolver) GetEstimate() generated.GetEstimateResolver {
+	return &getEstimateResolver{r}
 }
 
 func (r *Resolver) MakePurchase() generated.MakePurchaseResolver {

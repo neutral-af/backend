@@ -1,6 +1,14 @@
-type FlightEstimate {
-    fromAirports(departure: String!, arrival: String!, options: EstimateOptions = {}): Estimate
-    # fromFlightNumber(flightNumber: String!, date: String!): EstimateResponse
+type GetEstimate {
+    fromFlights(flights: [Flight!]!, options: EstimateOptions = {}): Estimate
+}
+
+input Flight {
+    # Either (departure,arrival) or (flightNumber,date) must be provided
+    # TODO: is there a better way to have an optional interface
+    departure: String
+    arrival: String
+    flightNumber: String
+    date: String
 }
 
 type Estimate {

@@ -11,5 +11,5 @@ import (
 func main() {
 	http.HandleFunc("/graphql", handler.Handler)
 	http.HandleFunc("/playground", gqlgenhandler.Playground("playground", "/graphql"))
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
