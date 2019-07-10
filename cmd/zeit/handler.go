@@ -16,8 +16,9 @@ var graphQLHandler http.HandlerFunc
 
 func init() {
 	beeline.Init(beeline.Config{
-		WriteKey: config.C.HoneycombAPIKey,
-		Dataset:  "carbonara-backend",
+		WriteKey:    config.C.HoneycombAPIKey,
+		Dataset:     "carbonara-backend",
+		ServiceName: "carbonara-go",
 	})
 	// defer beeline.Close()
 
