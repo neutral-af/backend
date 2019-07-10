@@ -24,16 +24,8 @@ func New(apiKey string) Cloverly {
 	}
 }
 
-// Estimate creates a Cloverly estimate for the given volume of carbon
-func (c *Cloverly) Estimate(carbon float64) (Response, error) {
-	path := "/estimates/carbon"
-
-	data, err := createBodyFromMap(map[string]interface{}{
-		"weight": map[string]interface{}{
-			"value": carbon,
-			"units": "kg",
-		},
-	})
+func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Response, error) {
+	data, err := createBodyFromMap(body)
 	if err != nil {
 		return Response{}, err
 	}
@@ -58,9 +50,28 @@ func (c *Cloverly) Estimate(carbon float64) (Response, error) {
 	return responseData, nil
 }
 
+// Estimate creates a Cloverly estimate for the given volume of carbon
+func (c *Cloverly) Estimate(carbon float64) (Response, error) {
+	path := "/estimates/carbon"
+
+	data := map[string]interface{}{
+		"weight": map[string]interface{}{
+			"value": carbon,
+			"units": "kg",
+		},
+	}
+
+	return c.postWithBody(path, data)
+}
+
 func (c *Cloverly) Purchase(estimateID string) (Response, error) {
-	// path := "/purchases"
-	return Response{}, nil
+	path := "/purchases"
+
+	data := map[string]interface{}{
+		"estimate_slug": estimateID,
+	}
+
+	return c.postWithBody(path, data)
 }
 
 // Response matches the schema of an estimate or purchase response from Cloverly
@@ -109,25 +120,6 @@ type Response struct {
 		Deprecated       map[string]string
 	} `json:"renewable_energy_certificate"`
 }
-
-// func createCarbonEstimateBody(carbonKilograms float64) (io.Reader, error) {
-// 	var body struct {
-// 		Weight struct {
-// 			Value float64 `json:"value"`
-// 			Units string  `json:"units"`
-// 		} `json:"weight"`
-// 	}
-
-// 	body.Weight.Units = "kg"
-// 	body.Weight.Value = carbonKilograms
-
-// 	b, err := json.Marshal(body)
-// 	if err != nil {
-// 		return bytes.NewReader([]byte{}), err
-// 	}
-
-// 	return bytes.NewReader(b), nil
-// }
 
 func createBodyFromMap(data map[string]interface{}) (io.Reader, error) {
 	b, err := json.Marshal(data)

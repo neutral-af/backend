@@ -66,6 +66,6 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 		}, nil
 	}
 
-	return nil, errors.New("Provider not set")
+	return nil, errors.New("Provider unknown or not set")
 
 }

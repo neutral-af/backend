@@ -74,3 +74,13 @@ Estimate showing fees (via cost breakdown):
             }
         }
     }
+
+Purchase an offset using an estimate ID and provider:
+
+    mutation {
+        purchase {
+            fromEstimate(estimateID:"20190710-cloverly-slug", provider:Cloverly) {
+                id carbon details
+            }
+        }
+    }

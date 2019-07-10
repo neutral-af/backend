@@ -3,6 +3,7 @@ package resolvers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 )
@@ -10,7 +11,7 @@ import (
 type makePurchaseResolver struct{ *Resolver }
 
 func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *models.MakePurchase, estimateID *string, provider *models.Provider) (*models.Purchase, error) {
-	var resp *models.Purchase
+	resp := &models.Purchase{}
 
 	if *provider == models.ProviderCloverly {
 		result, err := cloverlyAPI.Purchase(*estimateID)
@@ -23,7 +24,8 @@ func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *models.Make
 		detailsBytes, err := json.Marshal(result)
 		details := string(detailsBytes)
 		resp.Details = &details
+		return resp, nil
 	}
 
-	return resp, nil
+	return nil, errors.New("Provider unknown or not set")
 }
