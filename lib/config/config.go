@@ -8,6 +8,7 @@ import (
 )
 
 type config struct {
+	Environment     string `mapstructure:"ENVIRONMENT"`
 	CloverlyAPIKey  string `mapstructure:"CLOVERLY_API_KEY"`
 	HoneycombAPIKey string `mapstructure:"HONEYCOMB_API_KEY"`
 	PaymentsBaseURL string `mapstructure:"PAYMENTS_BASE_URL"`
@@ -26,6 +27,7 @@ func New() config {
 		viper.SetConfigType("dotenv")
 	}
 
+	viper.BindEnv("ENVIRONMENT")
 	viper.BindEnv("CLOVERLY_API_KEY")
 	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.BindEnv("PAYMENTS_BASE_URL")

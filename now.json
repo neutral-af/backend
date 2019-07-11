@@ -8,6 +8,7 @@
         { "src": "/graphql", "dest": "cmd/zeit/handler.go" }
     ],
     "env": {
+        "ENVIRONMENT": "prod",
         "CLOVERLY_API_KEY": "@cloverly_api_key",
         "HONEYCOMB_API_KEY": "@honeycomb_api_key",
         "PAYMENTS_BASE_URL": "https://frontend.jasongwartz.now.sh/payments/"
