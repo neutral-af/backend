@@ -1,6 +1,8 @@
 package distance
 
 import (
+	"errors"
+
 	geo "github.com/kellydunn/golang-geo"
 	"github.com/mmcloughlin/openflights"
 )
@@ -28,13 +30,16 @@ func getAirportGeo(iata string) airportGeo {
 
 // TwoAirports returns the Great Circle Distance between the airports given by the
 // two IATA codes
-func TwoAirports(departureCode string, arrivalCode string) float64 {
+func TwoAirports(departureCode string, arrivalCode string) (float64, error) {
 	departureData := getAirportGeo(departureCode)
 	arrivalData := getAirportGeo(arrivalCode)
+	if departureData == (airportGeo{}) || arrivalData == (airportGeo{}) {
+		return 0, errors.New("Airport not found")
+	}
 
 	departureGeo := geo.NewPoint(departureData.Latitude, departureData.Longitude)
 	arrivalGeo := geo.NewPoint(arrivalData.Latitude, arrivalData.Longitude)
 
 	distance := departureGeo.GreatCircleDistance(arrivalGeo)
-	return distance
+	return distance, nil
 }

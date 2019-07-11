@@ -29,7 +29,10 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 
 	for _, f := range flights {
 		if f.Departure != nil && *f.Departure != "" && f.Arrival != nil && *f.Arrival != "" {
-			distance := distance.TwoAirports(*f.Departure, *f.Arrival)
+			distance, err := distance.TwoAirports(*f.Departure, *f.Arrival)
+			if err != nil {
+				return nil, err
+			}
 			emissions := emissions.FlightCarbon(distance)
 			totalCarbon += emissions
 		} else if f.FlightNumber != nil && *f.FlightNumber != "" && f.Date != nil && *f.Date != "" {
