@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 
 	GetEstimate struct {
 		FromFlights func(childComplexity int, flights []*models.Flight, options *models.EstimateOptions) int
+		FromID      func(childComplexity int, id *string, provider *models.Provider) int
 	}
 
 	MakePurchase struct {
@@ -96,6 +97,7 @@ type EstimateResolver interface {
 }
 type GetEstimateResolver interface {
 	FromFlights(ctx context.Context, obj *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error)
+	FromID(ctx context.Context, obj *models.GetEstimate, id *string, provider *models.Provider) (*models.Estimate, error)
 }
 type MakePurchaseResolver interface {
 	FromEstimate(ctx context.Context, obj *models.MakePurchase, estimateID *string, provider *models.Provider) (*models.Purchase, error)
@@ -174,6 +176,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GetEstimate.FromFlights(childComplexity, args["flights"].([]*models.Flight), args["options"].(*models.EstimateOptions)), true
+
+	case "GetEstimate.fromID":
+		if e.complexity.GetEstimate.FromID == nil {
+			break
+		}
+
+		args, err := ec.field_GetEstimate_fromID_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.GetEstimate.FromID(childComplexity, args["id"].(*string), args["provider"].(*models.Provider)), true
 
 	case "MakePurchase.fromEstimate":
 		if e.complexity.MakePurchase.FromEstimate == nil {
@@ -342,6 +356,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema/estimate.graphql", Input: `type GetEstimate {
     fromFlights(flights: [Flight!]!, options: EstimateOptions = {}): Estimate
+    fromID(id: ID, provider: Provider): Estimate
 }
 
 input Flight {
@@ -446,6 +461,28 @@ func (ec *executionContext) field_GetEstimate_fromFlights_args(ctx context.Conte
 		}
 	}
 	args["options"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_GetEstimate_fromID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *models.Provider
+	if tmp, ok := rawArgs["provider"]; ok {
+		arg1, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["provider"] = arg1
 	return args, nil
 }
 
@@ -728,6 +765,47 @@ func (ec *executionContext) _GetEstimate_fromFlights(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.GetEstimate().FromFlights(rctx, obj, args["flights"].([]*models.Flight), args["options"].(*models.EstimateOptions))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.Estimate)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetEstimate_fromID(ctx context.Context, field graphql.CollectedField, obj *models.GetEstimate) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GetEstimate",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_GetEstimate_fromID_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.GetEstimate().FromID(rctx, obj, args["id"].(*string), args["provider"].(*models.Provider))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2605,6 +2683,17 @@ func (ec *executionContext) _GetEstimate(ctx context.Context, sel ast.SelectionS
 					}
 				}()
 				res = ec._GetEstimate_fromFlights(ctx, field, obj)
+				return res
+			})
+		case "fromID":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._GetEstimate_fromID(ctx, field, obj)
 				return res
 			})
 		default:

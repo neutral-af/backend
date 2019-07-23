@@ -46,38 +46,57 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
 	if *options.Provider == models.ProviderCloverly {
-		estimate, err := cloverlyAPI.Estimate(totalCarbon)
+		estimate, err := cloverlyAPI.CreateCarbonEstimate(totalCarbon)
 		if err != nil {
 			return nil, err
 		}
 
 		beeline.AddField(ctx, "estimateID", estimate.Slug)
 
-		detailsBytes, err := json.Marshal(estimate)
-		details := string(detailsBytes)
+		return cloverlyToEstimate(estimate)
+	}
+
+	return nil, errors.New("Provider unknown or not set")
+}
+
+func (r *getEstimateResolver) FromID(ctx context.Context, get *models.GetEstimate, id *string, provider *models.Provider) (*models.Estimate, error) {
+	if *provider == models.ProviderCloverly {
+		estimate, err := cloverlyAPI.RetrieveEstimate(*id)
 		if err != nil {
 			return nil, err
 		}
 
-		return &models.Estimate{
-			ID: estimate.Slug,
-			Price: &models.Price{
-				Cents:    estimate.TotalCostInUSDCents, // This value should get rewritten into a local currency below
-				Currency: models.CurrencyUsd,           // This should also get rewritten (based on user-selected currency)
-				Breakdown: []*models.PriceElement{
-					&models.PriceElement{
-						Name:     "Cloverly processing fee",
-						Cents:    estimate.TransactionCostInUSDCents,
-						Currency: models.CurrencyUsd,
-					},
-				},
-			},
-			Carbon:   &estimate.EquivalentCarbonInKG,
-			Provider: options.Provider,
-			Details:  &details,
-		}, nil
+		return cloverlyToEstimate((estimate))
 	}
 
-	return nil, errors.New("Provider unknown or not set")
+	return nil, errors.New("Cannot retrieve estimate for given provider")
+}
+
+func cloverlyToEstimate(response cloverly.Response) (*models.Estimate, error) {
+	provider := models.ProviderCloverly
+
+	detailsBytes, err := json.Marshal(response)
+	details := string(detailsBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.Estimate{
+		ID: response.Slug,
+		Price: &models.Price{
+			Cents:    response.TotalCostInUSDCents, // This value should get rewritten into a local currency below
+			Currency: models.CurrencyUsd,           // This should also get rewritten (based on user-selected currency)
+			Breakdown: []*models.PriceElement{
+				&models.PriceElement{
+					Name:     "Cloverly processing fee",
+					Cents:    response.TransactionCostInUSDCents,
+					Currency: models.CurrencyUsd,
+				},
+			},
+		},
+		Carbon:   &response.EquivalentCarbonInKG,
+		Provider: &provider,
+		Details:  &details,
+	}, nil
 
 }

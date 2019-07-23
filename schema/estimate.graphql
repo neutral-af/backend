@@ -1,5 +1,6 @@
 type GetEstimate {
     fromFlights(flights: [Flight!]!, options: EstimateOptions = {}): Estimate
+    fromID(id: ID, provider: Provider): Estimate
 }
 
 input Flight {

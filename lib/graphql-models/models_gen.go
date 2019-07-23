@@ -29,6 +29,7 @@ type Flight struct {
 
 type GetEstimate struct {
 	FromFlights *Estimate `json:"fromFlights"`
+	FromID      *Estimate `json:"fromID"`
 }
 
 type MakePurchase struct {

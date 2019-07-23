@@ -17,6 +17,8 @@ models:
     fields:
       fromFlights:
         resolver: true
+      fromID:
+        resolver: true
   Estimate:
     fields:
       price:

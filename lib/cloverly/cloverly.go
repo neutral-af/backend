@@ -25,6 +25,30 @@ func New(apiKey string) Cloverly {
 	}
 }
 
+func (c *Cloverly) get(path string) (Response, error) {
+	resp, err := grequests.Get(c.baseURL+path, &grequests.RequestOptions{
+		Headers: map[string]string{
+			"Content-Type":  "application/json",
+			"Authorization": fmt.Sprintf("Bearer private_key:%s", c.apiKey),
+		},
+	})
+	if err != nil {
+		return Response{}, err
+	}
+
+	var responseData Response
+	err = resp.JSON(&responseData)
+	if err != nil {
+		return Response{}, err
+	}
+
+	if responseData.Error != "" {
+		return Response{}, errors.Wrap(errors.New(responseData.Error), "Error in Cloverly response")
+	}
+
+	return responseData, nil
+}
+
 func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Response, error) {
 	data, err := createBodyFromMap(body)
 	if err != nil {
@@ -56,7 +80,7 @@ func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Respo
 }
 
 // Estimate creates a Cloverly estimate for the given volume of carbon
-func (c *Cloverly) Estimate(carbon float64) (Response, error) {
+func (c *Cloverly) CreateCarbonEstimate(carbon float64) (Response, error) {
 	path := "/estimates/carbon"
 
 	data := map[string]interface{}{
@@ -67,6 +91,13 @@ func (c *Cloverly) Estimate(carbon float64) (Response, error) {
 	}
 
 	return c.postWithBody(path, data)
+}
+
+func (c *Cloverly) RetrieveEstimate(slug string) (Response, error) {
+	path := fmt.Sprintf("/estimates/%s", slug)
+
+	return c.get((path))
+
 }
 
 func (c *Cloverly) Purchase(estimateID string) (Response, error) {
@@ -123,7 +154,7 @@ type Response struct {
 			Y float64
 		} `json:"latlng"`
 		TechnicalDetails string `json:"technical_details"`
-		Deprecated       map[string]string
+		Deprecated       string
 	} `json:"renewable_energy_certificate"`
 }
 

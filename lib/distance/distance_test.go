@@ -13,6 +13,7 @@ func TestGetAirportGeo(t *testing.T) {
 }
 
 func TestTwoAirports(t *testing.T) {
-	dist := TwoAirports("YYZ", "SXF")
+	dist, err := TwoAirports("YYZ", "SXF")
+	assert.NoError(t, err)
 	assert.Greater(t, dist, 6000.0)
 }
