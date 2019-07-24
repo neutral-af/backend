@@ -26,6 +26,7 @@ require (
 	github.com/rs/cors v1.6.0
 	github.com/spf13/viper v1.4.1-0.20190614151712-3349bd9cc288
 	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
+	github.com/stripe/stripe-go v61.19.0+incompatible
 	github.com/subosito/gotenv v1.1.1 // indirect
 	github.com/vektah/gqlparser v1.1.2
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect

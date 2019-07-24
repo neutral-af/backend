@@ -9,7 +9,6 @@ type Price {
     currency: Currency!
     cents: Int!
     breakdown: [PriceElement]
-    paymentURL: String
 }
 
 type PriceElement {

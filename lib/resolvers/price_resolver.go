@@ -2,12 +2,8 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
-	"net/url"
-	"strconv"
 
 	"github.com/honeycombio/beeline-go"
-	"github.com/jasongwartz/carbon-offset-backend/lib/config"
 	"github.com/jasongwartz/carbon-offset-backend/lib/currency"
 	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
 )
@@ -54,17 +50,6 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 	e.Price.Breakdown = append(e.Price.Breakdown, fees...)
 	e.Price.Cents = totalCents
 	e.Price.Currency = userCurrency
-
-	// Now that we have all the payment-related data,
-	// we can generate the payments URL
-	v := url.Values{}
-	v.Set("carbon", strconv.FormatFloat(*e.Carbon, 'f', -1, 64))
-	v.Add("priceCents", strconv.Itoa(e.Price.Cents))
-	v.Add("currency", e.Price.Currency.String())
-	v.Add("estimateID", e.ID)
-
-	paymentURL := fmt.Sprintf("%s?%s", config.C.PaymentsBaseURL, v.Encode())
-	e.Price.PaymentURL = &paymentURL
 
 	return e.Price, nil
 }

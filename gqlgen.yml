@@ -3,6 +3,7 @@ schema:
 - schema/globals.graphql
 - schema/estimate.graphql
 - schema/purchase.graphql
+- schema/payment.graphql
 exec:
   filename: lib/graphql-generated/generated.go
   package: generated
@@ -26,4 +27,10 @@ models:
   MakePurchase:
     fields:
       fromEstimate:
+        resolver: true
+  PaymentActions:
+    fields:
+      checkout:
+        resolver: true
+      confirm:
         resolver: true

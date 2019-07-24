@@ -36,11 +36,29 @@ type MakePurchase struct {
 	FromEstimate *Purchase `json:"fromEstimate"`
 }
 
+type PaymentActions struct {
+	Checkout *PaymentResponse `json:"checkout"`
+	Confirm  *PaymentResponse `json:"confirm"`
+}
+
+type PaymentOptions struct {
+	SaveCard   *bool   `json:"saveCard"`
+	EstimateID *string `json:"estimateID"`
+}
+
+type PaymentResponse struct {
+	Success                   *bool    `json:"success"`
+	CustomerID                *string  `json:"customerID"`
+	RequiresAction            *bool    `json:"requiresAction"`
+	PaymentIntentClientSecret *string  `json:"paymentIntentClientSecret"`
+	PurchaseID                *string  `json:"purchaseID"`
+	PurchaseCarbon            *float64 `json:"purchaseCarbon"`
+}
+
 type Price struct {
-	Currency   Currency        `json:"currency"`
-	Cents      int             `json:"cents"`
-	Breakdown  []*PriceElement `json:"breakdown"`
-	PaymentURL *string         `json:"paymentURL"`
+	Currency  Currency        `json:"currency"`
+	Cents     int             `json:"cents"`
+	Breakdown []*PriceElement `json:"breakdown"`
 }
 
 type PriceElement struct {

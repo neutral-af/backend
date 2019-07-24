@@ -23,3 +23,7 @@ func (r *Resolver) GetEstimate() generated.GetEstimateResolver {
 func (r *Resolver) MakePurchase() generated.MakePurchaseResolver {
 	return &makePurchaseResolver{r}
 }
+
+func (r *Resolver) PaymentActions() generated.PaymentActionsResolver {
+	return &paymentActionsResolver{r}
+}

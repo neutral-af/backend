@@ -11,7 +11,7 @@ type config struct {
 	Environment     string `mapstructure:"ENVIRONMENT"`
 	CloverlyAPIKey  string `mapstructure:"CLOVERLY_API_KEY"`
 	HoneycombAPIKey string `mapstructure:"HONEYCOMB_API_KEY"`
-	PaymentsBaseURL string `mapstructure:"PAYMENTS_BASE_URL"`
+	StripeSecretKey string `mapstructure:"STRIPE_SECRET_KEY"`
 }
 
 // C is the object containing config values
@@ -30,7 +30,7 @@ func New() config {
 	viper.BindEnv("ENVIRONMENT")
 	viper.BindEnv("CLOVERLY_API_KEY")
 	viper.BindEnv("HONEYCOMB_API_KEY")
-	viper.BindEnv("PAYMENTS_BASE_URL")
+	viper.BindEnv("STRIPE_SECRET_KEY")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
