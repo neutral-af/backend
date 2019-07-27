@@ -17,6 +17,15 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 	userCurrency := *inputCurrency
 	beeline.AddField(ctx, "currency", userCurrency)
 
+	// Localise main price currency
+	localCents, err := currency.Convert(e.Price.Cents, e.Price.Currency, userCurrency)
+	if err != nil {
+		return nil, err
+	}
+
+	totalCents := localCents
+
+	// Localise fees (and rest of breakdown)
 	fees := []*models.PriceElement{
 		&models.PriceElement{
 			Name:     "Stripe processing fee (30 cents USD)",
@@ -29,13 +38,7 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 			Currency: e.Price.Currency,
 		},
 	}
-
-	localCents, err := currency.Convert(e.Price.Cents, e.Price.Currency, userCurrency)
-	if err != nil {
-		return nil, err
-	}
-
-	totalCents := localCents
+	fees = append(fees, e.Price.Breakdown...)
 
 	for _, f := range fees {
 		cents, err := currency.Convert(f.Cents, f.Currency, userCurrency)
@@ -47,7 +50,7 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 		totalCents = totalCents + cents
 	}
 
-	e.Price.Breakdown = append(e.Price.Breakdown, fees...)
+	e.Price.Breakdown = fees
 	e.Price.Cents = totalCents
 	e.Price.Currency = userCurrency
 
