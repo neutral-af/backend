@@ -17,19 +17,19 @@ var airportMap map[string]airportGeo
 func init() {
 	airportMap = make(map[string]airportGeo)
 	for _, i := range openflights.Airports {
-		airportMap[i.IATA] = airportGeo{
+		airportMap[i.ICAO] = airportGeo{
 			Latitude:  i.Latitude,
 			Longitude: i.Longitude,
 		}
 	}
 }
 
-func getAirportGeo(iata string) airportGeo {
-	return airportMap[iata]
+func getAirportGeo(icao string) airportGeo {
+	return airportMap[icao]
 }
 
 // TwoAirports returns the Great Circle Distance between the airports given by the
-// two IATA codes
+// two ICAO codes
 func TwoAirports(departureCode string, arrivalCode string) (float64, error) {
 	departureData := getAirportGeo(departureCode)
 	arrivalData := getAirportGeo(arrivalCode)
