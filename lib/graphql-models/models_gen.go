@@ -44,6 +44,7 @@ type PaymentActions struct {
 type PaymentOptions struct {
 	SaveCard   *bool   `json:"saveCard"`
 	EstimateID *string `json:"estimateID"`
+	CustomerID *string `json:"customerID"`
 }
 
 type PaymentResponse struct {

@@ -497,6 +497,7 @@ enum Provider {
 input PaymentOptions {
     saveCard: Boolean
     estimateID: String
+    customerID: String
 }
 
 type PaymentResponse {
@@ -3077,6 +3078,12 @@ func (ec *executionContext) unmarshalInputPaymentOptions(ctx context.Context, ob
 		case "estimateID":
 			var err error
 			it.EstimateID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "customerID":
+			var err error
+			it.CustomerID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

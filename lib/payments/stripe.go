@@ -59,7 +59,11 @@ func Checkout(paymentMethod string, amount int, currency models.Currency, opts *
 		)),
 		Confirm: stripe.Bool(true),
 	}
-	if *opts.SaveCard {
+
+	if opts != nil && opts.CustomerID != nil {
+		params.Customer = opts.CustomerID
+	}
+	if opts != nil && opts.SaveCard != nil && *opts.SaveCard {
 		params.SetupFutureUsage = stripe.String(string(stripe.PaymentIntentSetupFutureUsageOnSession))
 	}
 	intent, err := paymentintent.New(params)

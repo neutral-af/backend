@@ -6,6 +6,7 @@ type PaymentActions {
 input PaymentOptions {
     saveCard: Boolean
     estimateID: String
+    customerID: String
 }
 
 type PaymentResponse {
