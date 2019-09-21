@@ -99,9 +99,12 @@ func cloverlyToEstimate(response cloverly.Response) (*models.Estimate, error) {
 	return &models.Estimate{
 		ID: response.Slug,
 		Price: &models.Price{
-			Cents:    response.TotalCostInUSDCents, // This value should get rewritten into a local currency below
-			Currency: models.CurrencyUsd,           // This should also get rewritten (based on user-selected currency)
 			Breakdown: []*models.PriceElement{
+				&models.PriceElement{
+					Name:     "Your carbon offsets contribution",
+					Cents:    response.RecCostInUSDCents,
+					Currency: models.CurrencyUsd,
+				},
 				&models.PriceElement{
 					Name:     "Cloverly processing fee",
 					Cents:    response.TransactionCostInUSDCents,
@@ -113,5 +116,4 @@ func cloverlyToEstimate(response cloverly.Response) (*models.Estimate, error) {
 		Provider: &provider,
 		Details:  &details,
 	}, nil
-
 }

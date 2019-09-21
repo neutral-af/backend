@@ -17,30 +17,15 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 	userCurrency := *inputCurrency
 	beeline.AddField(ctx, "currency", userCurrency)
 
-	// Localise main price currency
-	localCents, err := currency.Convert(e.Price.Cents, e.Price.Currency, userCurrency)
-	if err != nil {
-		return nil, err
-	}
+	priceElements := e.Price.Breakdown
+	priceElements = append(priceElements, &models.PriceElement{
+		Name:     "Stripe processing fee (30 cents USD)",
+		Cents:    30,
+		Currency: models.CurrencyUsd,
+	})
 
-	totalCents := localCents
-
-	// Localise fees (and rest of breakdown)
-	fees := []*models.PriceElement{
-		&models.PriceElement{
-			Name:     "Stripe processing fee (30 cents USD)",
-			Cents:    30,
-			Currency: models.CurrencyUsd,
-		},
-		&models.PriceElement{
-			Name:     "Our fee (10%)",
-			Cents:    e.Price.Cents / 10,
-			Currency: e.Price.Currency,
-		},
-	}
-	fees = append(fees, e.Price.Breakdown...)
-
-	for _, f := range fees {
+	totalCents := 0
+	for _, f := range priceElements {
 		cents, err := currency.Convert(f.Cents, f.Currency, userCurrency)
 		if err != nil {
 			return nil, err
@@ -50,7 +35,15 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 		totalCents = totalCents + cents
 	}
 
-	e.Price.Breakdown = fees
+	commission := totalCents / 10
+	totalCents += commission
+	priceElements = append(priceElements, &models.PriceElement{
+		Name:     "Our fee (10%)",
+		Cents:    commission,
+		Currency: userCurrency,
+	})
+
+	e.Price.Breakdown = priceElements
 	e.Price.Cents = totalCents
 	e.Price.Currency = userCurrency
 
