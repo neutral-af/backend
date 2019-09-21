@@ -1,4 +1,6 @@
-# carbon-offset-backend
+# Neutral.af - API
+
+This is the GraphQL API that powers the neutral.af site.
 
 ## Getting Started
 
