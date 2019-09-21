@@ -14,8 +14,13 @@ func TestPriceResolverNoop(t *testing.T) {
 
 	estimate := &models.Estimate{
 		Price: &models.Price{
-			Cents:    cents,
-			Currency: currency,
+			Breakdown: []*models.PriceElement{
+				&models.PriceElement{
+					Name:     "Main fee",
+					Currency: models.CurrencyEur,
+					Cents:    cents,
+				},
+			},
 		},
 	}
 
@@ -24,25 +29,26 @@ func TestPriceResolverNoop(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	var fees int
-	for _, f := range price.Breakdown {
-		fees += f.Cents
-	}
-	assert.Equal(t, cents, price.Cents-fees)
+	assert.Equal(t, price.Currency, currency)
+	assert.Equal(t, price.Breakdown[0].Currency, currency)
+	assert.Equal(t, price.Breakdown[0].Cents, cents)
+	assert.GreaterOrEqual(t, price.Cents, cents)
 }
 
 func TestPriceResolverConvert(t *testing.T) {
-	// NOTE! This test very dangerously assumes that
-	// the EUR is worth more than CAD. If this changes,
-	// the test will break.
 	cents := 100
 	baseCurrency := models.CurrencyEur
 	userCurrency := models.CurrencyCad
 
 	estimate := &models.Estimate{
 		Price: &models.Price{
-			Cents:    cents,
-			Currency: baseCurrency,
+			Breakdown: []*models.PriceElement{
+				&models.PriceElement{
+					Name:     "Main fee",
+					Currency: baseCurrency,
+					Cents:    cents,
+				},
+			},
 		},
 	}
 
@@ -51,9 +57,14 @@ func TestPriceResolverConvert(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	var fees int
-	for _, f := range price.Breakdown {
-		fees += f.Cents
-	}
-	assert.Greater(t, price.Cents-fees, cents)
+	assert.NotEqual(t, price.Cents, cents)
+	assert.Equal(t, price.Currency, userCurrency)
+	assert.NotEqual(t, price.Breakdown[0].Cents, cents)
+	assert.NotEqual(t, price.Breakdown[0].Currency, baseCurrency)
+	assert.Equal(t, price.Breakdown[0].Currency, userCurrency)
+
+	// NOTE! The following assertion very dangerously assumes that
+	// the EUR is worth more than CAD. If this changes,
+	// the test will break.
+	assert.Greater(t, price.Breakdown[0].Cents, cents)
 }
