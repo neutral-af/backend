@@ -1,6 +1,6 @@
 # carbon-offset-backend
 
-# Getting Started
+## Getting Started
 
 First, install the Go dependencies and build the GraphQL generated types (if necessary):
 
