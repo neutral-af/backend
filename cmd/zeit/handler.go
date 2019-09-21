@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/99designs/gqlgen/handler"
+	gqlgen_handler "github.com/99designs/gqlgen/handler"
 	"github.com/honeycombio/beeline-go"
 	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
 	"github.com/jasongwartz/carbon-offset-backend/lib/config"
@@ -23,7 +23,7 @@ func init() {
 	})
 	// defer beeline.Close()
 
-	graphQLHandler = hnynethttp.WrapHandlerFunc(handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}})))
+	graphQLHandler = hnynethttp.WrapHandlerFunc(gqlgen_handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}})))
 	fmt.Println("Registered graphQL handler")
 }
 
@@ -31,7 +31,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var origins []string
 
 	if config.C.Environment == "prod" {
-		origins = []string{"https://frontend.jasongwartz.now.sh"}
+		origins = []string{"https://neutral.af", "https://*.neutral.af"}
 	} else {
 		origins = []string{"http://localhost:8080"}
 	}
