@@ -6,7 +6,8 @@
         { "src": "cmd/zeit/handler.go", "use": "@now/go" }
     ],
     "routes": [
-        { "src": "/graphql", "dest": "cmd/zeit/handler.go" }
+        { "src": "/graphql", "dest": "cmd/zeit/handler.go" },
+        { "src": "/.*", "status": 404 }
     ],
     "env": {
         "ENVIRONMENT": "prod",
