@@ -17,6 +17,7 @@ type Estimate {
     price(currency: Currency = USD): Price # Price obj defined in globals
     provider: Provider
     carbon: Float # kg CO2
+    km: Float
     details: String # json blob
 }
 

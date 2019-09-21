@@ -13,6 +13,7 @@ type Estimate struct {
 	Price    *Price    `json:"price"`
 	Provider *Provider `json:"provider"`
 	Carbon   *float64  `json:"carbon"`
+	Km       *float64  `json:"km"`
 	Details  *string   `json:"details"`
 }
 

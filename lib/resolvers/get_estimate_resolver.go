@@ -25,6 +25,7 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	ctx, span := beeline.StartSpan(ctx, "fromFlights")
 	defer span.Send()
 
+	totalDistance := 0.0
 	totalCarbon := 0.0
 
 	for _, f := range flights {
@@ -33,6 +34,8 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 			if err != nil {
 				return nil, err
 			}
+			totalDistance += distance
+
 			emissions := emissions.FlightCarbon(distance)
 			totalCarbon += emissions
 		} else if f.FlightNumber != nil && *f.FlightNumber != "" && f.Date != nil && *f.Date != "" {
@@ -46,14 +49,20 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
 	if *options.Provider == models.ProviderCloverly {
-		estimate, err := cloverlyAPI.CreateCarbonEstimate(totalCarbon)
+		cloverlyEstimate, err := cloverlyAPI.CreateCarbonEstimate(totalCarbon)
 		if err != nil {
 			return nil, err
 		}
 
-		beeline.AddField(ctx, "estimateID", estimate.Slug)
+		beeline.AddField(ctx, "estimateID", cloverlyEstimate.Slug)
 
-		return cloverlyToEstimate(estimate)
+		estimate, err := cloverlyToEstimate(cloverlyEstimate)
+		if err != nil {
+			return nil, err
+		}
+		estimate.Km = &totalDistance
+
+		return estimate, nil
 	}
 
 	return nil, errors.New("Provider unknown or not set")

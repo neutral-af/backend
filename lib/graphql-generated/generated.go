@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 		Carbon   func(childComplexity int) int
 		Details  func(childComplexity int) int
 		ID       func(childComplexity int) int
+		Km       func(childComplexity int) int
 		Price    func(childComplexity int, currency *models.Currency) int
 		Provider func(childComplexity int) int
 	}
@@ -165,6 +166,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Estimate.ID(childComplexity), true
+
+	case "Estimate.km":
+		if e.complexity.Estimate.Km == nil {
+			break
+		}
+
+		return e.complexity.Estimate.Km(childComplexity), true
 
 	case "Estimate.price":
 		if e.complexity.Estimate.Price == nil {
@@ -459,6 +467,7 @@ type Estimate {
     price(currency: Currency = USD): Price # Price obj defined in globals
     provider: Provider
     carbon: Float # kg CO2
+    km: Float
     details: String # json blob
 }
 
@@ -856,6 +865,40 @@ func (ec *executionContext) _Estimate_carbon(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Carbon, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Estimate_km(ctx context.Context, field graphql.CollectedField, obj *models.Estimate) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Estimate",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Km, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3132,6 +3175,8 @@ func (ec *executionContext) _Estimate(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Estimate_provider(ctx, field, obj)
 		case "carbon":
 			out.Values[i] = ec._Estimate_carbon(ctx, field, obj)
+		case "km":
+			out.Values[i] = ec._Estimate_km(ctx, field, obj)
 		case "details":
 			out.Values[i] = ec._Estimate_details(ctx, field, obj)
 		default:
