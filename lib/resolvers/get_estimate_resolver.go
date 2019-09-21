@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math"
 
 	"github.com/honeycombio/beeline-go"
 	"github.com/jasongwartz/carbon-offset-backend/lib/cloverly"
@@ -25,8 +26,8 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	ctx, span := beeline.StartSpan(ctx, "fromFlights")
 	defer span.Send()
 
-	totalDistance := 0.0
-	totalCarbon := 0.0
+	accumDistance := 0.0
+	accumCarbon := 0.0
 
 	for _, f := range flights {
 		if f.Departure != nil && *f.Departure != "" && f.Arrival != nil && *f.Arrival != "" {
@@ -34,16 +35,19 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 			if err != nil {
 				return nil, err
 			}
-			totalDistance += distance
+			accumDistance += distance
 
 			emissions := emissions.FlightCarbon(distance)
-			totalCarbon += emissions
+			accumCarbon += emissions
 		} else if f.FlightNumber != nil && *f.FlightNumber != "" && f.Date != nil && *f.Date != "" {
 			return nil, errors.New("Calculating from flight number not yet implemented")
 		} else {
 			return nil, errors.New("Invalid flight input: either (departure,arrival) or (flightNumber,date) must be provided")
 		}
 	}
+
+	totalDistance := int(math.Round(accumDistance))
+	totalCarbon := int(math.Round(accumCarbon))
 
 	beeline.AddField(ctx, "provider", *options.Provider)
 	beeline.AddField(ctx, "carbon", totalCarbon)
@@ -90,6 +94,8 @@ func cloverlyToEstimate(response cloverly.Response) (*models.Estimate, error) {
 		return nil, err
 	}
 
+	totalCarbon := int(math.Round(response.EquivalentCarbonInKG))
+
 	return &models.Estimate{
 		ID: response.Slug,
 		Price: &models.Price{
@@ -103,7 +109,7 @@ func cloverlyToEstimate(response cloverly.Response) (*models.Estimate, error) {
 				},
 			},
 		},
-		Carbon:   &response.EquivalentCarbonInKG,
+		Carbon:   &totalCarbon,
 		Provider: &provider,
 		Details:  &details,
 	}, nil

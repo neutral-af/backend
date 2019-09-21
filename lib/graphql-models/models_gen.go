@@ -12,8 +12,8 @@ type Estimate struct {
 	ID       string    `json:"id"`
 	Price    *Price    `json:"price"`
 	Provider *Provider `json:"provider"`
-	Carbon   *float64  `json:"carbon"`
-	Km       *float64  `json:"km"`
+	Carbon   *int      `json:"carbon"`
+	Km       *int      `json:"km"`
 	Details  *string   `json:"details"`
 }
 

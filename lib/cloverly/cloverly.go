@@ -80,7 +80,7 @@ func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Respo
 }
 
 // Estimate creates a Cloverly estimate for the given volume of carbon
-func (c *Cloverly) CreateCarbonEstimate(carbon float64) (Response, error) {
+func (c *Cloverly) CreateCarbonEstimate(carbon int) (Response, error) {
 	path := "/estimates/carbon"
 
 	data := map[string]interface{}{

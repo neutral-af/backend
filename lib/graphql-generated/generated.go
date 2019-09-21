@@ -466,8 +466,8 @@ type Estimate {
     id: ID! # The ID can be used to convert an estimate to a purchase
     price(currency: Currency = USD): Price # Price obj defined in globals
     provider: Provider
-    carbon: Float # kg CO2
-    km: Float
+    carbon: Int # kg CO2
+    km: Int
     details: String # json blob
 }
 
@@ -873,10 +873,10 @@ func (ec *executionContext) _Estimate_carbon(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*float64)
+	res := resTmp.(*int)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Estimate_km(ctx context.Context, field graphql.CollectedField, obj *models.Estimate) (ret graphql.Marshaler) {
@@ -907,10 +907,10 @@ func (ec *executionContext) _Estimate_km(ctx context.Context, field graphql.Coll
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*float64)
+	res := resTmp.(*int)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Estimate_details(ctx context.Context, field graphql.CollectedField, obj *models.Estimate) (ret graphql.Marshaler) {
@@ -4242,6 +4242,29 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 		return graphql.Null
 	}
 	return ec.marshalOID2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	return graphql.MarshalInt(v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOInt2int(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalOMakePurchase2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v models.MakePurchase) graphql.Marshaler {

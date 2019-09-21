@@ -16,8 +16,8 @@ type Estimate {
     id: ID! # The ID can be used to convert an estimate to a purchase
     price(currency: Currency = USD): Price # Price obj defined in globals
     provider: Provider
-    carbon: Float # kg CO2
-    km: Float
+    carbon: Int # kg CO2
+    km: Int
     details: String # json blob
 }
 
