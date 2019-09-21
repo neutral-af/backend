@@ -22,7 +22,7 @@ To simulate the runtime of Zeit, after installing the `now` cli, run: (you'll ne
 
 ## GraphQL Schema
 
-The schema files are located in `schema/`, and the Go types are generated using `gqlgen` and configured in the `gqlgen.yml`.
+The schema files are located in `schema/`, and the Go types are generated using `gqlgen` and configured in the `gqlgen.yml`. You'll need to [install gqlgen](https://github.com/99designs/gqlgen) first.
 
 When the schema changes, the generated Go types need to be updated as well. After updating the `schema` submodule, run:
 
