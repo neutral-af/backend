@@ -1,6 +1,7 @@
 {
     "version": 2,
     "name": "backend",
+    "alias": ["api.neutral.af"],
     "builds": [
         { "src": "cmd/zeit/handler.go", "use": "@now/go" }
     ],
