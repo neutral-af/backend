@@ -31,9 +31,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var origins []string
 
 	if config.C.Environment == "prod" {
-		origins = []string{"https://neutral.af", "https://*.neutral.af"}
+		origins = []string{"https://neutral.af"}
 	} else {
-		origins = []string{"http://localhost:8080"}
+		origins = []string{"*"}
 	}
 
 	c := cors.New(cors.Options{
