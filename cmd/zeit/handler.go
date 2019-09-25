@@ -7,9 +7,9 @@ import (
 	gqlgen_handler "github.com/99designs/gqlgen/handler"
 	"github.com/honeycombio/beeline-go"
 	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
-	"github.com/jasongwartz/carbon-offset-backend/lib/config"
-	generated "github.com/jasongwartz/carbon-offset-backend/lib/graphql-generated"
-	"github.com/jasongwartz/carbon-offset-backend/lib/resolvers"
+	"github.com/neutral-af/backend/lib/config"
+	generated "github.com/neutral-af/backend/lib/graphql-generated"
+	"github.com/neutral-af/backend/lib/resolvers"
 	"github.com/rs/cors"
 )
 

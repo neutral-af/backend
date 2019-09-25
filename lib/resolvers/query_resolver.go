@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/honeycombio/beeline-go"
-	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 )
 
 type queryResolver struct{ *Resolver }

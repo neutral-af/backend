@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jasongwartz/carbon-offset-backend/lib/config"
-	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
+	"github.com/neutral-af/backend/lib/config"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 
 	stripe "github.com/stripe/stripe-go"
 	customer "github.com/stripe/stripe-go/customer"

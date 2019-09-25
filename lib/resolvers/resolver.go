@@ -1,6 +1,6 @@
 package resolvers
 
-import generated "github.com/jasongwartz/carbon-offset-backend/lib/graphql-generated"
+import generated "github.com/neutral-af/backend/lib/graphql-generated"
 
 type Resolver struct{}
 

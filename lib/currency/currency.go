@@ -3,7 +3,7 @@ package currency
 import (
 	"time"
 
-	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 	"github.com/levigross/grequests"
 	"github.com/pkg/errors"
 )

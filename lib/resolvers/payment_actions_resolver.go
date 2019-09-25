@@ -3,8 +3,8 @@ package resolvers
 import (
 	"context"
 
-	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
-	"github.com/jasongwartz/carbon-offset-backend/lib/payments"
+	models "github.com/neutral-af/backend/lib/graphql-models"
+	"github.com/neutral-af/backend/lib/payments"
 )
 
 type paymentActionsResolver struct{ *Resolver }

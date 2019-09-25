@@ -3,7 +3,7 @@ package resolvers
 import (
 	"context"
 
-	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 )
 
 type mutationResolver struct{ *Resolver }

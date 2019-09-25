@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	gqlgenhandler "github.com/99designs/gqlgen/handler"
-	handler "github.com/jasongwartz/carbon-offset-backend/cmd/zeit"
+	handler "github.com/neutral-af/backend/cmd/zeit"
 )
 
 func main() {

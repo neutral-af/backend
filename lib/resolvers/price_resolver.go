@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/honeycombio/beeline-go"
-	"github.com/jasongwartz/carbon-offset-backend/lib/currency"
-	models "github.com/jasongwartz/carbon-offset-backend/lib/graphql-models"
+	"github.com/neutral-af/backend/lib/currency"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 )
 
 type estimateResolver struct{ *Resolver }

@@ -1,6 +1,6 @@
 FROM golang:1.12 as builder
 
-WORKDIR /go/src/github.com/jasongwartz/carbon-offset-backend
+WORKDIR /go/src/github.com/neutral-af/backend
 COPY go.mod go.sum ./
 RUN GO111MODULE=on go get -v
 
@@ -11,7 +11,7 @@ FROM alpine
 RUN apk add --no-cache ca-certificates
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /go/src/github.com/jasongwartz/carbon-offset-backend/main /main
+COPY --from=builder /go/src/github.com/neutral-af/backend/main /main
 
 # Run the web service on container startup.
 CMD ["/main"]
