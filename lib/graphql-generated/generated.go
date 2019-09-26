@@ -524,7 +524,7 @@ type PaymentResponse {
 
 type Purchase {
     id: ID!
-    carbon: Float!
+    carbon: Int!
     details: String
 }`},
 	&ast.Source{Name: "schema/schema.graphql", Input: `type Query {
@@ -548,7 +548,7 @@ func (ec *executionContext) field_Estimate_price_args(ctx context.Context, rawAr
 	args := map[string]interface{}{}
 	var arg0 *models.Currency
 	if tmp, ok := rawArgs["currency"]; ok {
-		arg0, err = ec.unmarshalOCurrency2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
+		arg0, err = ec.unmarshalOCurrency2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -562,7 +562,7 @@ func (ec *executionContext) field_GetEstimate_fromFlights_args(ctx context.Conte
 	args := map[string]interface{}{}
 	var arg0 []*models.Flight
 	if tmp, ok := rawArgs["flights"]; ok {
-		arg0, err = ec.unmarshalNFlight2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, tmp)
+		arg0, err = ec.unmarshalNFlight2ᚕᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -570,7 +570,7 @@ func (ec *executionContext) field_GetEstimate_fromFlights_args(ctx context.Conte
 	args["flights"] = arg0
 	var arg1 *models.EstimateOptions
 	if tmp, ok := rawArgs["options"]; ok {
-		arg1, err = ec.unmarshalOEstimateOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx, tmp)
+		arg1, err = ec.unmarshalOEstimateOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -592,7 +592,7 @@ func (ec *executionContext) field_GetEstimate_fromID_args(ctx context.Context, r
 	args["id"] = arg0
 	var arg1 *models.Provider
 	if tmp, ok := rawArgs["provider"]; ok {
-		arg1, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, tmp)
+		arg1, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -614,7 +614,7 @@ func (ec *executionContext) field_MakePurchase_fromEstimate_args(ctx context.Con
 	args["estimateID"] = arg0
 	var arg1 *models.Provider
 	if tmp, ok := rawArgs["provider"]; ok {
-		arg1, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, tmp)
+		arg1, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -644,7 +644,7 @@ func (ec *executionContext) field_PaymentActions_checkout_args(ctx context.Conte
 	args["amount"] = arg1
 	var arg2 models.Currency
 	if tmp, ok := rawArgs["currency"]; ok {
-		arg2, err = ec.unmarshalNCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
+		arg2, err = ec.unmarshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -652,7 +652,7 @@ func (ec *executionContext) field_PaymentActions_checkout_args(ctx context.Conte
 	args["currency"] = arg2
 	var arg3 *models.PaymentOptions
 	if tmp, ok := rawArgs["options"]; ok {
-		arg3, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
+		arg3, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -674,7 +674,7 @@ func (ec *executionContext) field_PaymentActions_confirm_args(ctx context.Contex
 	args["paymentIntent"] = arg0
 	var arg1 *models.PaymentOptions
 	if tmp, ok := rawArgs["options"]; ok {
-		arg1, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
+		arg1, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -808,7 +808,7 @@ func (ec *executionContext) _Estimate_price(ctx context.Context, field graphql.C
 	res := resTmp.(*models.Price)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPrice2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPrice(ctx, field.Selections, res)
+	return ec.marshalOPrice2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPrice(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Estimate_provider(ctx context.Context, field graphql.CollectedField, obj *models.Estimate) (ret graphql.Marshaler) {
@@ -842,7 +842,7 @@ func (ec *executionContext) _Estimate_provider(ctx context.Context, field graphq
 	res := resTmp.(*models.Provider)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, field.Selections, res)
+	return ec.marshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Estimate_carbon(ctx context.Context, field graphql.CollectedField, obj *models.Estimate) (ret graphql.Marshaler) {
@@ -985,7 +985,7 @@ func (ec *executionContext) _GetEstimate_fromFlights(ctx context.Context, field 
 	res := resTmp.(*models.Estimate)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
+	return ec.marshalOEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _GetEstimate_fromID(ctx context.Context, field graphql.CollectedField, obj *models.GetEstimate) (ret graphql.Marshaler) {
@@ -1026,7 +1026,7 @@ func (ec *executionContext) _GetEstimate_fromID(ctx context.Context, field graph
 	res := resTmp.(*models.Estimate)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
+	return ec.marshalOEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MakePurchase_fromEstimate(ctx context.Context, field graphql.CollectedField, obj *models.MakePurchase) (ret graphql.Marshaler) {
@@ -1067,7 +1067,7 @@ func (ec *executionContext) _MakePurchase_fromEstimate(ctx context.Context, fiel
 	res := resTmp.(*models.Purchase)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPurchase2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx, field.Selections, res)
+	return ec.marshalOPurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_purchase(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1101,7 +1101,7 @@ func (ec *executionContext) _Mutation_purchase(ctx context.Context, field graphq
 	res := resTmp.(*models.MakePurchase)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMakePurchase2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx, field.Selections, res)
+	return ec.marshalOMakePurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_payment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1135,7 +1135,7 @@ func (ec *executionContext) _Mutation_payment(ctx context.Context, field graphql
 	res := resTmp.(*models.PaymentActions)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPaymentActions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx, field.Selections, res)
+	return ec.marshalOPaymentActions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PaymentActions_checkout(ctx context.Context, field graphql.CollectedField, obj *models.PaymentActions) (ret graphql.Marshaler) {
@@ -1176,7 +1176,7 @@ func (ec *executionContext) _PaymentActions_checkout(ctx context.Context, field 
 	res := resTmp.(*models.PaymentResponse)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPaymentResponse2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx, field.Selections, res)
+	return ec.marshalOPaymentResponse2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PaymentActions_confirm(ctx context.Context, field graphql.CollectedField, obj *models.PaymentActions) (ret graphql.Marshaler) {
@@ -1217,7 +1217,7 @@ func (ec *executionContext) _PaymentActions_confirm(ctx context.Context, field g
 	res := resTmp.(*models.PaymentResponse)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPaymentResponse2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx, field.Selections, res)
+	return ec.marshalOPaymentResponse2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PaymentResponse_success(ctx context.Context, field graphql.CollectedField, obj *models.PaymentResponse) (ret graphql.Marshaler) {
@@ -1458,7 +1458,7 @@ func (ec *executionContext) _Price_currency(ctx context.Context, field graphql.C
 	res := resTmp.(models.Currency)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Price_cents(ctx context.Context, field graphql.CollectedField, obj *models.Price) (ret graphql.Marshaler) {
@@ -1529,7 +1529,7 @@ func (ec *executionContext) _Price_breakdown(ctx context.Context, field graphql.
 	res := resTmp.([]*models.PriceElement)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPriceElement2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx, field.Selections, res)
+	return ec.marshalOPriceElement2ᚕᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PriceElement_name(ctx context.Context, field graphql.CollectedField, obj *models.PriceElement) (ret graphql.Marshaler) {
@@ -1640,7 +1640,7 @@ func (ec *executionContext) _PriceElement_currency(ctx context.Context, field gr
 	res := resTmp.(models.Currency)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Purchase_id(ctx context.Context, field graphql.CollectedField, obj *models.Purchase) (ret graphql.Marshaler) {
@@ -1711,10 +1711,10 @@ func (ec *executionContext) _Purchase_carbon(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(int)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Purchase_details(ctx context.Context, field graphql.CollectedField, obj *models.Purchase) (ret graphql.Marshaler) {
@@ -1819,7 +1819,7 @@ func (ec *executionContext) _Query_estimate(ctx context.Context, field graphql.C
 	res := resTmp.(*models.GetEstimate)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOGetEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx, field.Selections, res)
+	return ec.marshalOGetEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3060,7 +3060,7 @@ func (ec *executionContext) unmarshalInputEstimateOptions(ctx context.Context, o
 		switch k {
 		case "provider":
 			var err error
-			it.Provider, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, v)
+			it.Provider, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3794,20 +3794,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, v interface{}) (models.Currency, error) {
+func (ec *executionContext) unmarshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, v interface{}) (models.Currency, error) {
 	var res models.Currency
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v models.Currency) graphql.Marshaler {
+func (ec *executionContext) marshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v models.Currency) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNFlight2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) (models.Flight, error) {
+func (ec *executionContext) unmarshalNFlight2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) (models.Flight, error) {
 	return ec.unmarshalInputFlight(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNFlight2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) ([]*models.Flight, error) {
+func (ec *executionContext) unmarshalNFlight2ᚕᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) ([]*models.Flight, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -3819,7 +3819,7 @@ func (ec *executionContext) unmarshalNFlight2ᚕᚖgithubᚗcomᚋjasongwartzᚋ
 	var err error
 	res := make([]*models.Flight, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNFlight2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNFlight2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -3827,26 +3827,12 @@ func (ec *executionContext) unmarshalNFlight2ᚕᚖgithubᚗcomᚋjasongwartzᚋ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNFlight2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) (*models.Flight, error) {
+func (ec *executionContext) unmarshalNFlight2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) (*models.Flight, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNFlight2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, v)
+	res, err := ec.unmarshalNFlight2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, v)
 	return &res, err
-}
-
-func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
-	return graphql.UnmarshalFloat(v)
-}
-
-func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-	res := graphql.MarshalFloat(v)
-	if res == graphql.Null {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -4140,50 +4126,50 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, v interface{}) (models.Currency, error) {
+func (ec *executionContext) unmarshalOCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, v interface{}) (models.Currency, error) {
 	var res models.Currency
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalOCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v models.Currency) graphql.Marshaler {
+func (ec *executionContext) marshalOCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v models.Currency) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalOCurrency2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, v interface{}) (*models.Currency, error) {
+func (ec *executionContext) unmarshalOCurrency2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, v interface{}) (*models.Currency, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOCurrency2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, v)
+	res, err := ec.unmarshalOCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOCurrency2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v *models.Currency) graphql.Marshaler {
+func (ec *executionContext) marshalOCurrency2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v *models.Currency) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOEstimate2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx context.Context, sel ast.SelectionSet, v models.Estimate) graphql.Marshaler {
+func (ec *executionContext) marshalOEstimate2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx context.Context, sel ast.SelectionSet, v models.Estimate) graphql.Marshaler {
 	return ec._Estimate(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx context.Context, sel ast.SelectionSet, v *models.Estimate) graphql.Marshaler {
+func (ec *executionContext) marshalOEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx context.Context, sel ast.SelectionSet, v *models.Estimate) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Estimate(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOEstimateOptions2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx context.Context, v interface{}) (models.EstimateOptions, error) {
+func (ec *executionContext) unmarshalOEstimateOptions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx context.Context, v interface{}) (models.EstimateOptions, error) {
 	return ec.unmarshalInputEstimateOptions(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOEstimateOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx context.Context, v interface{}) (*models.EstimateOptions, error) {
+func (ec *executionContext) unmarshalOEstimateOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx context.Context, v interface{}) (*models.EstimateOptions, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOEstimateOptions2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx, v)
+	res, err := ec.unmarshalOEstimateOptions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx, v)
 	return &res, err
 }
 
@@ -4210,11 +4196,11 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return ec.marshalOFloat2float64(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOGetEstimate2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v models.GetEstimate) graphql.Marshaler {
+func (ec *executionContext) marshalOGetEstimate2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v models.GetEstimate) graphql.Marshaler {
 	return ec._GetEstimate(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOGetEstimate2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v *models.GetEstimate) graphql.Marshaler {
+func (ec *executionContext) marshalOGetEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v *models.GetEstimate) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4267,67 +4253,67 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOMakePurchase2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v models.MakePurchase) graphql.Marshaler {
+func (ec *executionContext) marshalOMakePurchase2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v models.MakePurchase) graphql.Marshaler {
 	return ec._MakePurchase(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOMakePurchase2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v *models.MakePurchase) graphql.Marshaler {
+func (ec *executionContext) marshalOMakePurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v *models.MakePurchase) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._MakePurchase(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPaymentActions2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx context.Context, sel ast.SelectionSet, v models.PaymentActions) graphql.Marshaler {
+func (ec *executionContext) marshalOPaymentActions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx context.Context, sel ast.SelectionSet, v models.PaymentActions) graphql.Marshaler {
 	return ec._PaymentActions(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOPaymentActions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx context.Context, sel ast.SelectionSet, v *models.PaymentActions) graphql.Marshaler {
+func (ec *executionContext) marshalOPaymentActions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx context.Context, sel ast.SelectionSet, v *models.PaymentActions) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PaymentActions(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOPaymentOptions2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx context.Context, v interface{}) (models.PaymentOptions, error) {
+func (ec *executionContext) unmarshalOPaymentOptions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx context.Context, v interface{}) (models.PaymentOptions, error) {
 	return ec.unmarshalInputPaymentOptions(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOPaymentOptions2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx context.Context, v interface{}) (*models.PaymentOptions, error) {
+func (ec *executionContext) unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx context.Context, v interface{}) (*models.PaymentOptions, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOPaymentOptions2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, v)
+	res, err := ec.unmarshalOPaymentOptions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOPaymentResponse2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx context.Context, sel ast.SelectionSet, v models.PaymentResponse) graphql.Marshaler {
+func (ec *executionContext) marshalOPaymentResponse2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx context.Context, sel ast.SelectionSet, v models.PaymentResponse) graphql.Marshaler {
 	return ec._PaymentResponse(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOPaymentResponse2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx context.Context, sel ast.SelectionSet, v *models.PaymentResponse) graphql.Marshaler {
+func (ec *executionContext) marshalOPaymentResponse2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentResponse(ctx context.Context, sel ast.SelectionSet, v *models.PaymentResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PaymentResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPrice2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPrice(ctx context.Context, sel ast.SelectionSet, v models.Price) graphql.Marshaler {
+func (ec *executionContext) marshalOPrice2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPrice(ctx context.Context, sel ast.SelectionSet, v models.Price) graphql.Marshaler {
 	return ec._Price(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOPrice2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPrice(ctx context.Context, sel ast.SelectionSet, v *models.Price) graphql.Marshaler {
+func (ec *executionContext) marshalOPrice2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPrice(ctx context.Context, sel ast.SelectionSet, v *models.Price) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Price(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPriceElement2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx context.Context, sel ast.SelectionSet, v models.PriceElement) graphql.Marshaler {
+func (ec *executionContext) marshalOPriceElement2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx context.Context, sel ast.SelectionSet, v models.PriceElement) graphql.Marshaler {
 	return ec._PriceElement(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOPriceElement2ᚕᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx context.Context, sel ast.SelectionSet, v []*models.PriceElement) graphql.Marshaler {
+func (ec *executionContext) marshalOPriceElement2ᚕᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx context.Context, sel ast.SelectionSet, v []*models.PriceElement) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4354,7 +4340,7 @@ func (ec *executionContext) marshalOPriceElement2ᚕᚖgithubᚗcomᚋjasongwart
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOPriceElement2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx, sel, v[i])
+			ret[i] = ec.marshalOPriceElement2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4367,42 +4353,42 @@ func (ec *executionContext) marshalOPriceElement2ᚕᚖgithubᚗcomᚋjasongwart
 	return ret
 }
 
-func (ec *executionContext) marshalOPriceElement2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx context.Context, sel ast.SelectionSet, v *models.PriceElement) graphql.Marshaler {
+func (ec *executionContext) marshalOPriceElement2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPriceElement(ctx context.Context, sel ast.SelectionSet, v *models.PriceElement) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._PriceElement(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOProvider2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, v interface{}) (models.Provider, error) {
+func (ec *executionContext) unmarshalOProvider2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, v interface{}) (models.Provider, error) {
 	var res models.Provider
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalOProvider2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, sel ast.SelectionSet, v models.Provider) graphql.Marshaler {
+func (ec *executionContext) marshalOProvider2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, sel ast.SelectionSet, v models.Provider) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, v interface{}) (*models.Provider, error) {
+func (ec *executionContext) unmarshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, v interface{}) (*models.Provider, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOProvider2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, v)
+	res, err := ec.unmarshalOProvider2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOProvider2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, sel ast.SelectionSet, v *models.Provider) graphql.Marshaler {
+func (ec *executionContext) marshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx context.Context, sel ast.SelectionSet, v *models.Provider) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOPurchase2githubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx context.Context, sel ast.SelectionSet, v models.Purchase) graphql.Marshaler {
+func (ec *executionContext) marshalOPurchase2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx context.Context, sel ast.SelectionSet, v models.Purchase) graphql.Marshaler {
 	return ec._Purchase(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOPurchase2ᚖgithubᚗcomᚋjasongwartzᚋcarbonᚑoffsetᚑbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx context.Context, sel ast.SelectionSet, v *models.Purchase) graphql.Marshaler {
+func (ec *executionContext) marshalOPurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx context.Context, sel ast.SelectionSet, v *models.Purchase) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

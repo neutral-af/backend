@@ -4,6 +4,6 @@ type MakePurchase {
 
 type Purchase {
     id: ID!
-    carbon: Float!
+    carbon: Int!
     details: String
 }

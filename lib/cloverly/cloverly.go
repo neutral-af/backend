@@ -219,7 +219,7 @@ func responseToEstimate(response Response) (*models.Estimate, error) {
 
 func responseToPurchase(response Response) (*models.Purchase, error) {
 	purchase := &models.Purchase{}
-	purchase.Carbon = response.EquivalentCarbonInKG
+	purchase.Carbon = int(math.Round(response.EquivalentCarbonInKG))
 	purchase.ID = response.Slug
 
 	detailsBytes, err := json.Marshal(response)
