@@ -3,8 +3,8 @@ package currency
 import (
 	"time"
 
-	models "github.com/neutral-af/backend/lib/graphql-models"
 	"github.com/levigross/grequests"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 	"github.com/pkg/errors"
 )
 
