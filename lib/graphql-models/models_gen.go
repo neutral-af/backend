@@ -71,7 +71,7 @@ type PriceElement struct {
 
 type Purchase struct {
 	ID      string  `json:"id"`
-	Carbon  float64 `json:"carbon"`
+	Carbon  int     `json:"carbon"`
 	Details *string `json:"details"`
 }
 

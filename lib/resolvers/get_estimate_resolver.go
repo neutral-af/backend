@@ -7,6 +7,7 @@ import (
 
 	"github.com/honeycombio/beeline-go"
 	"github.com/neutral-af/backend/lib/cloverly"
+	"github.com/neutral-af/backend/lib/digitalhumani"
 	"github.com/neutral-af/backend/lib/distance"
 	"github.com/neutral-af/backend/lib/emissions"
 	models "github.com/neutral-af/backend/lib/graphql-models"
@@ -14,9 +15,11 @@ import (
 )
 
 var cloverlyAPI cloverly.Cloverly
+var digitalHumaniAPI digitalhumani.DigitalHumani
 
 func init() {
 	cloverlyAPI = cloverly.New()
+	digitalHumaniAPI = digitalhumani.New()
 }
 
 type getEstimateResolver struct{ *Resolver }
@@ -52,12 +55,15 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
 	var provider providers.Provider
-	if *options.Provider == models.ProviderCloverly {
+	switch *options.Provider {
+	case models.ProviderCloverly:
 		provider = &cloverlyAPI
-	} else {
+	case models.ProviderDigitalHumani:
+		provider = &digitalHumaniAPI
+	default:
 		return nil, errors.New("Provider unknown or not set")
-
 	}
+
 	estimate, err := provider.CreateCarbonEstimate(totalCarbon)
 	if err != nil {
 		return nil, err

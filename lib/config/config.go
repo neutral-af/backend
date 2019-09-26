@@ -8,10 +8,11 @@ import (
 )
 
 type config struct {
-	Environment     string `mapstructure:"ENVIRONMENT"`
-	CloverlyAPIKey  string `mapstructure:"CLOVERLY_API_KEY"`
-	HoneycombAPIKey string `mapstructure:"HONEYCOMB_API_KEY"`
-	StripeSecretKey string `mapstructure:"STRIPE_SECRET_KEY"`
+	Environment               string `mapstructure:"ENVIRONMENT"`
+	CloverlyAPIKey            string `mapstructure:"CLOVERLY_API_KEY"`
+	DigitalHumaniEnterpriseID string `mapstructure:"DIGITALHUMANI_ENTERPRISE_ID"`
+	HoneycombAPIKey           string `mapstructure:"HONEYCOMB_API_KEY"`
+	StripeSecretKey           string `mapstructure:"STRIPE_SECRET_KEY"`
 }
 
 // C is the object containing config values
@@ -29,6 +30,7 @@ func New() config {
 
 	viper.BindEnv("ENVIRONMENT")
 	viper.BindEnv("CLOVERLY_API_KEY")
+	viper.BindEnv("DIGITALHUMANI_ENTERPRISE_ID")
 	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.BindEnv("STRIPE_SECRET_KEY")
 	viper.AutomaticEnv()
