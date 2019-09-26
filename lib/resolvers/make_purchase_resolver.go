@@ -2,36 +2,27 @@ package resolvers
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"github.com/honeycombio/beeline-go"
 	models "github.com/neutral-af/backend/lib/graphql-models"
+	providers "github.com/neutral-af/backend/lib/offset-providers"
 )
 
 type makePurchaseResolver struct{ *Resolver }
 
-func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *models.MakePurchase, estimateID *string, provider *models.Provider) (*models.Purchase, error) {
+func (r *makePurchaseResolver) FromEstimate(ctx context.Context, mp *models.MakePurchase, estimateID *string, selectedProvider *models.Provider) (*models.Purchase, error) {
 	ctx, span := beeline.StartSpan(ctx, "fromEstimate")
 	defer span.Send()
 
-	beeline.AddField(ctx, "provider", *provider)
+	beeline.AddField(ctx, "provider", *selectedProvider)
 
-	resp := &models.Purchase{}
-
-	if *provider == models.ProviderCloverly {
-		result, err := cloverlyAPI.Purchase(*estimateID)
-		if err != nil {
-			return nil, err
-		}
-		resp.Carbon = result.EquivalentCarbonInKG
-		resp.ID = result.Slug
-
-		detailsBytes, err := json.Marshal(result)
-		details := string(detailsBytes)
-		resp.Details = &details
-		return resp, nil
+	var provider providers.Provider
+	if *selectedProvider == models.ProviderCloverly {
+		provider = &cloverlyAPI
+	} else {
+		return nil, errors.New("Provider unknown or not set")
 	}
 
-	return nil, errors.New("Provider unknown or not set")
+	return provider.Purchase(*estimateID)
 }

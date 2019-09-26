@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 
 	"github.com/levigross/grequests"
+	"github.com/neutral-af/backend/lib/config"
+	models "github.com/neutral-af/backend/lib/graphql-models"
 	"github.com/pkg/errors"
 )
 
@@ -18,9 +21,9 @@ type Cloverly struct {
 type CloverlyOpts struct {
 }
 
-func New(apiKey string) Cloverly {
+func New() Cloverly {
 	return Cloverly{
-		apiKey:  apiKey,
+		apiKey:  config.C.CloverlyAPIKey,
 		baseURL: "https://api.cloverly.app/2019-03-beta",
 	}
 }
@@ -80,7 +83,7 @@ func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Respo
 }
 
 // Estimate creates a Cloverly estimate for the given volume of carbon
-func (c *Cloverly) CreateCarbonEstimate(carbon int) (Response, error) {
+func (c *Cloverly) CreateCarbonEstimate(carbon int) (*models.Estimate, error) {
 	path := "/estimates/carbon"
 
 	data := map[string]interface{}{
@@ -90,24 +93,38 @@ func (c *Cloverly) CreateCarbonEstimate(carbon int) (Response, error) {
 		},
 	}
 
-	return c.postWithBody(path, data)
+	response, err := c.postWithBody(path, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return responseToEstimate(response)
 }
 
-func (c *Cloverly) RetrieveEstimate(slug string) (Response, error) {
+func (c *Cloverly) RetrieveEstimate(slug string) (*models.Estimate, error) {
 	path := fmt.Sprintf("/estimates/%s", slug)
 
-	return c.get((path))
+	response, err := c.get((path))
+	if err != nil {
+		return nil, err
+	}
 
+	return responseToEstimate(response)
 }
 
-func (c *Cloverly) Purchase(estimateID string) (Response, error) {
+func (c *Cloverly) Purchase(estimateID string) (*models.Purchase, error) {
 	path := "/purchases"
 
 	data := map[string]interface{}{
 		"estimate_slug": estimateID,
 	}
 
-	return c.postWithBody(path, data)
+	response, err := c.postWithBody(path, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return responseToPurchase(response)
 }
 
 // Response matches the schema of an estimate or purchase response from Cloverly
@@ -165,4 +182,51 @@ func createBodyFromMap(data map[string]interface{}) (io.Reader, error) {
 	}
 
 	return bytes.NewReader(b), nil
+}
+
+func responseToEstimate(response Response) (*models.Estimate, error) {
+	provider := models.ProviderCloverly
+
+	detailsBytes, err := json.Marshal(response)
+	details := string(detailsBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	totalCarbon := int(math.Round(response.EquivalentCarbonInKG))
+
+	return &models.Estimate{
+		ID: response.Slug,
+		Price: &models.Price{
+			Breakdown: []*models.PriceElement{
+				&models.PriceElement{
+					Name:     "Your carbon offsets contribution",
+					Cents:    response.RecCostInUSDCents,
+					Currency: models.CurrencyUsd,
+				},
+				&models.PriceElement{
+					Name:     "Cloverly processing fee",
+					Cents:    response.TransactionCostInUSDCents,
+					Currency: models.CurrencyUsd,
+				},
+			},
+		},
+		Carbon:   &totalCarbon,
+		Provider: &provider,
+		Details:  &details,
+	}, nil
+}
+
+func responseToPurchase(response Response) (*models.Purchase, error) {
+	purchase := &models.Purchase{}
+	purchase.Carbon = response.EquivalentCarbonInKG
+	purchase.ID = response.Slug
+
+	detailsBytes, err := json.Marshal(response)
+	if err != nil {
+		return nil, err
+	}
+	details := string(detailsBytes)
+	purchase.Details = &details
+	return purchase, nil
 }

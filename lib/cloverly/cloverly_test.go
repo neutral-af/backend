@@ -43,12 +43,12 @@ func TestSimple(t *testing.T) {
 		Reply(200).
 		JSON(map[string]string{"slug": "test"})
 
-	c := New("mock_key")
+	c := New()
 	c.baseURL = mockUrl
 
 	resp, err := c.CreateCarbonEstimate(6000)
 	assert.NoError(t, err)
-	assert.Equal(t, resp.Slug, "test")
+	assert.Equal(t, resp.ID, "test")
 
 	assert.True(t, gock.IsDone())
 }
@@ -63,12 +63,12 @@ func TestRetrieve(t *testing.T) {
 		Reply(200).
 		JSON(map[string]string{"slug": "test"})
 
-	c := New("mock_key")
+	c := New()
 	c.baseURL = mockUrl
 
 	resp, err := c.RetrieveEstimate("test")
 	assert.NoError(t, err)
-	assert.Equal(t, resp.Slug, "test")
+	assert.Equal(t, resp.ID, "test")
 
 	assert.True(t, gock.IsDone())
 }
@@ -83,7 +83,7 @@ func TestRetrieveError(t *testing.T) {
 		Reply(200).
 		JSON(map[string]string{"error": "test"})
 
-	c := New("mock_key")
+	c := New()
 	c.baseURL = mockUrl
 
 	_, err := c.RetrieveEstimate("test")

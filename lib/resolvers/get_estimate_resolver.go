@@ -2,22 +2,21 @@ package resolvers
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"math"
 
 	"github.com/honeycombio/beeline-go"
 	"github.com/neutral-af/backend/lib/cloverly"
-	"github.com/neutral-af/backend/lib/config"
 	"github.com/neutral-af/backend/lib/distance"
 	"github.com/neutral-af/backend/lib/emissions"
 	models "github.com/neutral-af/backend/lib/graphql-models"
+	providers "github.com/neutral-af/backend/lib/offset-providers"
 )
 
 var cloverlyAPI cloverly.Cloverly
 
 func init() {
-	cloverlyAPI = cloverly.New(config.C.CloverlyAPIKey)
+	cloverlyAPI = cloverly.New()
 }
 
 type getEstimateResolver struct{ *Resolver }
@@ -52,24 +51,28 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "provider", *options.Provider)
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
+	var provider providers.Provider
 	if *options.Provider == models.ProviderCloverly {
-		cloverlyEstimate, err := cloverlyAPI.CreateCarbonEstimate(totalCarbon)
-		if err != nil {
-			return nil, err
-		}
+		provider = &cloverlyAPI
+	} else {
+		return nil, errors.New("Provider unknown or not set")
 
-		beeline.AddField(ctx, "estimateID", cloverlyEstimate.Slug)
-
-		estimate, err := cloverlyToEstimate(cloverlyEstimate)
-		if err != nil {
-			return nil, err
-		}
-		estimate.Km = &totalDistance
-
-		return estimate, nil
+	}
+	estimate, err := provider.CreateCarbonEstimate(totalCarbon)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("Provider unknown or not set")
+	beeline.AddField(ctx, "estimateID", estimate.ID)
+
+	// estimate, err := cloverlyToEstimate(estimateDetails)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	estimate.Km = &totalDistance
+
+	return estimate, nil
+
 }
 
 func (r *getEstimateResolver) FromID(ctx context.Context, get *models.GetEstimate, id *string, provider *models.Provider) (*models.Estimate, error) {
@@ -79,41 +82,8 @@ func (r *getEstimateResolver) FromID(ctx context.Context, get *models.GetEstimat
 			return nil, err
 		}
 
-		return cloverlyToEstimate((estimate))
+		return estimate, nil
 	}
 
 	return nil, errors.New("Cannot retrieve estimate for given provider")
-}
-
-func cloverlyToEstimate(response cloverly.Response) (*models.Estimate, error) {
-	provider := models.ProviderCloverly
-
-	detailsBytes, err := json.Marshal(response)
-	details := string(detailsBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	totalCarbon := int(math.Round(response.EquivalentCarbonInKG))
-
-	return &models.Estimate{
-		ID: response.Slug,
-		Price: &models.Price{
-			Breakdown: []*models.PriceElement{
-				&models.PriceElement{
-					Name:     "Your carbon offsets contribution",
-					Cents:    response.RecCostInUSDCents,
-					Currency: models.CurrencyUsd,
-				},
-				&models.PriceElement{
-					Name:     "Cloverly processing fee",
-					Cents:    response.TransactionCostInUSDCents,
-					Currency: models.CurrencyUsd,
-				},
-			},
-		},
-		Carbon:   &totalCarbon,
-		Provider: &provider,
-		Details:  &details,
-	}, nil
 }
