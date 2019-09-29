@@ -19,7 +19,7 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 
 	priceElements := e.Price.Breakdown
 	priceElements = append(priceElements, &models.PriceElement{
-		Name:     "Stripe processing fee (30 cents USD)",
+		Name:     "Payment processing fee",
 		Cents:    30,
 		Currency: models.CurrencyUsd,
 	})
