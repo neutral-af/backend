@@ -30,6 +30,9 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 
 	for _, f := range flights {
 		if f.Departure != nil && *f.Departure != "" && f.Arrival != nil && *f.Arrival != "" {
+			if *f.Departure == *f.Arrival {
+				return nil, errors.New("Departure and Arrival cannot be the same")
+			}
 			distance, err := distance.TwoAirports(*f.Departure, *f.Arrival)
 			if err != nil {
 				return nil, err
