@@ -20,7 +20,8 @@ jobs:
       with:
         go-version: 1.12
     - uses: actions/checkout@v1
-    - run: |
+    - name: check if gqlgen has a diff
+      run: |
         go install github.com/99designs/gqlgen
         echo $GOPATH
         echo $PATH
