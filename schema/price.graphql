@@ -6,7 +6,7 @@ enum Currency {
 }
 
 type Price {
-    currency: Currency!
+    currency: Currency
     cents: Int!
     breakdown: [PriceElement]
 }
