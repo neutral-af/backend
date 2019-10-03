@@ -1,28 +1,30 @@
 # Neutral.af - API
 
-This is the GraphQL API that powers the neutral.af site.
+*The Golang and GraphQL project that's carbon neutral (as f\*\*k).*
 
-## Getting Started
+## Contributing
 
-First, install the Go dependencies and build the GraphQL generated types (if necessary):
+All contributions are welcome! Please feel free to open issues or PRs, update documentation, or implement features. Look for issues marked as `good-first-issue` for good places to jump in.
 
-    make deps
+If you're considering implementing a new feature or modifying an existing one, please open an issue first for discussion (so that we can talk about implementation before you spend your precious time on it).
 
-To run unit tests, use:
+## Developing
 
-    make test
+### Quick Start
 
-To run the dev server, export a `CLOVERLY_API_KEY`, then run:
+To run the dev server, copy the `.env.template` to a `.env` file. Add the necessary keys (see [below](#config--credentials)) and then run:
 
     make dev
 
-This dev server starts an http dev server on port 8000, equivalent to the http routing set up by Zeit.
+This dev server starts an http dev server on port 8000, matching the http routing set up in production/staging by [Zeit](https://zeit.co).
 
-To simulate the runtime of Zeit, after installing the `now` cli, run: (you'll need a `.env` file with the necessary environment variables)
+A [GraphQL playground](https://github.com/prisma-labs/graphql-playground) is also found on `/playground` (ie. http://localhost:8000/playground). You can try entering the query `{ health }` to test the playground's connection to the backend.
 
-    now dev
+To run the Go unit tests, use:
 
-## GraphQL Schema
+    make test
+
+### GraphQL Schema
 
 The schema files are located in `schema/`, and the Go types are generated using `gqlgen` and configured in the `gqlgen.yml`. You'll need to [install gqlgen](https://github.com/99designs/gqlgen) first.
 
@@ -30,9 +32,15 @@ When the schema changes, the generated Go types need to be updated as well. Afte
 
     make deps
 
-## Config & Credentials
+### Config & Credentials
 
 The environment variables required are specified in [config.go](lib/config/config.go). They need to be either exported in the environment or provided in a dotenv (`.env`) file. A `.env.template` file is provided as an example.
+
+The keys you need will depend on what you're working on:
+
+- If you are only developing the carbon-estimation logic, you won't need any keys (but you won't be able to make any GraphQL queries, so you'll need to use on tests)
+- If you're working on the logic for calling one of the offset providers (eg. Cloverly), you'll need a test/sandbox API key (which you can typically get by signing up for a test account with the provider)
+- If you are working on the payments logic, you'll need a Stripe private key, which you can get by signing up for a test/sandbox account (if you're also testing the frontend, you'll need the matching public key)
 
 ## Example Queries
 
