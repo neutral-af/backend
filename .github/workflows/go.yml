@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v1
     - run: diff -u <(echo -n) <(gofmt -d ./)
 
-  fmt:
+  gqlgen:
     name: gqlgen
     runs-on: ubuntu-latest
     steps:
