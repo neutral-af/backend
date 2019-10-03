@@ -29,7 +29,7 @@ jobs:
 
         make gen
 
-        git diff --exit-code || echo '\n\nPlease update the generated code (by running `make deps`).'
+        git diff --exit-code || (echo "\n\nPlease update the generated code (by running 'make deps')." && exit 1)
 
   test:
     name: test
