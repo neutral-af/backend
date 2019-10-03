@@ -22,9 +22,13 @@ jobs:
     - uses: actions/checkout@v1
     - name: check if gqlgen has a diff
       run: |
+        export GOPATH=$(go env GOPATH)
         go install github.com/99designs/gqlgen
         echo $GOPATH
         echo $PATH
+        ls $GOPATH/bin
+        which gqlgen
+
         make gen
 
         git diff --exit-code || echo '\n\nPlease update the generated code (by running `make deps`).'
