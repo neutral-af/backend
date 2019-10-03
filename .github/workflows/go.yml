@@ -28,7 +28,6 @@ jobs:
         echo $GOPATH
         echo $PATH
         ls $GOPATH/bin
-        which gqlgen
 
         make gen
 
