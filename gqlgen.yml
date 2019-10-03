@@ -1,9 +1,10 @@
 schema:
-- schema/schema.graphql
-- schema/globals.graphql
+- schema/root.graphql
+- schema/provider.graphql
 - schema/estimate.graphql
 - schema/purchase.graphql
 - schema/payment.graphql
+- schema/price.graphql
 exec:
   filename: lib/graphql-generated/generated.go
   package: generated

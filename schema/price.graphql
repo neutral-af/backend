@@ -16,8 +16,3 @@ type PriceElement {
     cents: Int!
     currency: Currency!
 }
-
-enum Provider {
-    Cloverly        # https://www.cloverly.com/
-    DigitalHumani   # http://digitalhumani.com/
-}

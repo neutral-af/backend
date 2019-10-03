@@ -1,4 +1,4 @@
-.PHONY: dev deps test
+.PHONY: dev deps test deploy
 
 test:
 	go test ./... -cover

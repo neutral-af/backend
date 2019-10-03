@@ -475,29 +475,6 @@ input EstimateOptions {
     provider: Provider = Cloverly # Default provider
 }
 `},
-	&ast.Source{Name: "schema/globals.graphql", Input: `enum Currency {
-    USD
-    EUR
-    GBP
-    CAD
-}
-
-type Price {
-    currency: Currency!
-    cents: Int!
-    breakdown: [PriceElement]
-}
-
-type PriceElement {
-    name: String!
-    cents: Int!
-    currency: Currency!
-}
-
-enum Provider {
-    Cloverly        # https://www.cloverly.com/
-    DigitalHumani   # http://digitalhumani.com/
-}`},
 	&ast.Source{Name: "schema/payment.graphql", Input: `type PaymentActions {
     checkout(paymentMethod: String!, amount: Int!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
     confirm(paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
@@ -518,6 +495,29 @@ type PaymentResponse {
     purchaseCarbon: Float
 }
 `},
+	&ast.Source{Name: "schema/price.graphql", Input: `enum Currency {
+    USD
+    EUR
+    GBP
+    CAD
+}
+
+type Price {
+    currency: Currency!
+    cents: Int!
+    breakdown: [PriceElement]
+}
+
+type PriceElement {
+    name: String!
+    cents: Int!
+    currency: Currency!
+}
+`},
+	&ast.Source{Name: "schema/provider.graphql", Input: `enum Provider {
+    Cloverly        # https://www.cloverly.com/
+    DigitalHumani   # http://digitalhumani.com/
+}`},
 	&ast.Source{Name: "schema/purchase.graphql", Input: `type MakePurchase {
     fromEstimate(estimateID: ID, provider: Provider): Purchase
 }
@@ -527,7 +527,7 @@ type Purchase {
     carbon: Int!
     details: String
 }`},
-	&ast.Source{Name: "schema/schema.graphql", Input: `type Query {
+	&ast.Source{Name: "schema/root.graphql", Input: `type Query {
     health: Boolean!
     estimate: GetEstimate
 }

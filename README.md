@@ -24,6 +24,14 @@ To run the Go unit tests, use:
 
     make test
 
+### Prerequisites
+
+The only core requirement is a recent version of Go, with support for Go Modules.
+
+If you want to deploy your own test version to Zeit, you'll need the [now-cli](https://github.com/zeit/now).
+
+If you want to change the GraphQL schema, you'll also need to install [gqlgen](https://github.com/99designs/gqlgen), with `go get -u github.com/99designs/gqlgen`.
+
 ### GraphQL Schema
 
 The schema files are located in `schema/`, and the Go types are generated using `gqlgen` and configured in the `gqlgen.yml`. You'll need to [install gqlgen](https://github.com/99designs/gqlgen) first.
