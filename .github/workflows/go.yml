@@ -23,6 +23,7 @@ jobs:
     - name: check if gqlgen has a diff
       run: |
         export GOPATH=$(go env GOPATH)
+        export PATH="$PATH:$GOPATH"
         go install github.com/99designs/gqlgen
         echo $GOPATH
         echo $PATH
