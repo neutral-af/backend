@@ -25,7 +25,7 @@ jobs:
         go install github.com/99designs/gqlgen
         echo $GOPATH
         echo $PATH
-        make deps
+        make gen
 
         git diff --exit-code || echo '\n\nPlease update the generated code (by running `make deps`).'
 
