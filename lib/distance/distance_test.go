@@ -6,14 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetAirportGeo(t *testing.T) {
-	airport := getAirportGeo("CYYZ")
-	assert.NotZero(t, airport.Latitude)
-	assert.NotZero(t, airport.Longitude)
-}
-
 func TestTwoAirports(t *testing.T) {
 	dist, err := TwoAirports("CYYZ", "EDDB")
 	assert.NoError(t, err)
 	assert.Greater(t, dist, 6000.0)
+}
+
+func TestAirportNotFound(t *testing.T) {
+	dist, err := TwoAirports("invalid", "EDDB")
+	assert.Error(t, err)
+	assert.Equal(t, dist, 0.0)
 }

@@ -5,6 +5,7 @@ schema:
 - schema/purchase.graphql
 - schema/payment.graphql
 - schema/price.graphql
+- schema/airport.graphql
 exec:
   filename: lib/graphql-generated/generated.go
   package: generated
@@ -15,6 +16,12 @@ resolver:
   filename: lib/resolvers/resolver.go
   type: Resolver
 models:
+  GetAirport:
+    fields:
+      search:
+        resolver: true
+      fromICAO:
+        resolver: true
   GetEstimate:
     fields:
       fromFlights:

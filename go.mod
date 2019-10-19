@@ -19,11 +19,13 @@ require (
 	github.com/honeycombio/libhoney-go v1.11.1 // indirect
 	github.com/kellydunn/golang-geo v0.7.0
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/levigross/grequests v0.0.0-20190130132859-37c80f76a0da
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mmcloughlin/openflights v0.0.0-20170819211133-257f09e6e50c
 	github.com/pkg/errors v0.8.1
 	github.com/rs/cors v1.6.0
+	github.com/sahilm/fuzzy v0.1.0
 	github.com/spf13/viper v1.4.1-0.20190614151712-3349bd9cc288
 	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
 	github.com/stripe/stripe-go v61.19.0+incompatible
