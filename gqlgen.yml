@@ -18,7 +18,7 @@ resolver:
 models:
   GetAirport:
     fields:
-      fuzzySearch:
+      search:
         resolver: true
       fromICAO:
         resolver: true

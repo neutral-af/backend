@@ -37,8 +37,8 @@ type Flight struct {
 }
 
 type GetAirport struct {
-	FuzzySearch []*Airport `json:"fuzzySearch"`
-	FromIcao    *Airport   `json:"fromICAO"`
+	Search   []*Airport `json:"search"`
+	FromIcao *Airport   `json:"fromICAO"`
 }
 
 type GetEstimate struct {

@@ -1,5 +1,5 @@
 type GetAirport {
-    fuzzySearch(query: String!): [Airport]
+    search(query: String!): [Airport]
     fromICAO(code: String!): Airport
 }
 

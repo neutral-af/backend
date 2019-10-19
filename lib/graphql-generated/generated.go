@@ -66,8 +66,8 @@ type ComplexityRoot struct {
 	}
 
 	GetAirport struct {
-		FromIcao    func(childComplexity int, code string) int
-		FuzzySearch func(childComplexity int, query string) int
+		FromIcao func(childComplexity int, code string) int
+		Search   func(childComplexity int, query string) int
 	}
 
 	GetEstimate struct {
@@ -127,7 +127,7 @@ type EstimateResolver interface {
 	Price(ctx context.Context, obj *models.Estimate, currency *models.Currency) (*models.Price, error)
 }
 type GetAirportResolver interface {
-	FuzzySearch(ctx context.Context, obj *models.GetAirport, query string) ([]*models.Airport, error)
+	Search(ctx context.Context, obj *models.GetAirport, query string) ([]*models.Airport, error)
 	FromIcao(ctx context.Context, obj *models.GetAirport, code string) (*models.Airport, error)
 }
 type GetEstimateResolver interface {
@@ -260,17 +260,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetAirport.FromIcao(childComplexity, args["code"].(string)), true
 
-	case "GetAirport.fuzzySearch":
-		if e.complexity.GetAirport.FuzzySearch == nil {
+	case "GetAirport.search":
+		if e.complexity.GetAirport.Search == nil {
 			break
 		}
 
-		args, err := ec.field_GetAirport_fuzzySearch_args(context.TODO(), rawArgs)
+		args, err := ec.field_GetAirport_search_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.GetAirport.FuzzySearch(childComplexity, args["query"].(string)), true
+		return e.complexity.GetAirport.Search(childComplexity, args["query"].(string)), true
 
 	case "GetEstimate.fromFlights":
 		if e.complexity.GetEstimate.FromFlights == nil {
@@ -535,7 +535,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema/airport.graphql", Input: `type GetAirport {
-    fuzzySearch(query: String!): [Airport]
+    search(query: String!): [Airport]
     fromICAO(code: String!): Airport
 }
 
@@ -671,7 +671,7 @@ func (ec *executionContext) field_GetAirport_fromICAO_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_GetAirport_fuzzySearch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_GetAirport_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1260,7 +1260,7 @@ func (ec *executionContext) _Estimate_details(ctx context.Context, field graphql
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _GetAirport_fuzzySearch(ctx context.Context, field graphql.CollectedField, obj *models.GetAirport) (ret graphql.Marshaler) {
+func (ec *executionContext) _GetAirport_search(ctx context.Context, field graphql.CollectedField, obj *models.GetAirport) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1277,7 +1277,7 @@ func (ec *executionContext) _GetAirport_fuzzySearch(ctx context.Context, field g
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_GetAirport_fuzzySearch_args(ctx, rawArgs)
+	args, err := ec.field_GetAirport_search_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1286,7 +1286,7 @@ func (ec *executionContext) _GetAirport_fuzzySearch(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.GetAirport().FuzzySearch(rctx, obj, args["query"].(string))
+		return ec.resolvers.GetAirport().Search(rctx, obj, args["query"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3677,7 +3677,7 @@ func (ec *executionContext) _GetAirport(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("GetAirport")
-		case "fuzzySearch":
+		case "search":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3685,7 +3685,7 @@ func (ec *executionContext) _GetAirport(ctx context.Context, sel ast.SelectionSe
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._GetAirport_fuzzySearch(ctx, field, obj)
+				res = ec._GetAirport_search(ctx, field, obj)
 				return res
 			})
 		case "fromICAO":

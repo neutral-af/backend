@@ -11,7 +11,7 @@ import (
 
 type getAirportResolver struct{ *Resolver }
 
-func (r *getAirportResolver) FuzzySearch(ctx context.Context, get *models.GetAirport, query string) ([]*models.Airport, error) {
+func (r *getAirportResolver) Search(ctx context.Context, get *models.GetAirport, query string) ([]*models.Airport, error) {
 	airports := airports.GetAll()
 	results := fuzzy.FindFrom(query, airports)
 
