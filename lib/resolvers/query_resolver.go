@@ -19,3 +19,7 @@ func (r *queryResolver) Health(ctx context.Context) (bool, error) {
 func (r *queryResolver) Estimate(ctx context.Context) (*models.GetEstimate, error) {
 	return &models.GetEstimate{}, nil
 }
+
+func (r *queryResolver) Airport(ctx context.Context) (*models.GetAirport, error) {
+	return &models.GetAirport{}, nil
+}

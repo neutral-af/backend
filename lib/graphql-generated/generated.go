@@ -36,6 +36,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Estimate() EstimateResolver
+	GetAirport() GetAirportResolver
 	GetEstimate() GetEstimateResolver
 	MakePurchase() MakePurchaseResolver
 	Mutation() MutationResolver
@@ -47,6 +48,14 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Airport struct {
+		City    func(childComplexity int) int
+		Country func(childComplexity int) int
+		Iata    func(childComplexity int) int
+		Icao    func(childComplexity int) int
+		Name    func(childComplexity int) int
+	}
+
 	Estimate struct {
 		Carbon   func(childComplexity int) int
 		Details  func(childComplexity int) int
@@ -54,6 +63,11 @@ type ComplexityRoot struct {
 		Km       func(childComplexity int) int
 		Price    func(childComplexity int, currency *models.Currency) int
 		Provider func(childComplexity int) int
+	}
+
+	GetAirport struct {
+		FromIcao    func(childComplexity int, code string) int
+		FuzzySearch func(childComplexity int, query string) int
 	}
 
 	GetEstimate struct {
@@ -103,6 +117,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Airport  func(childComplexity int) int
 		Estimate func(childComplexity int) int
 		Health   func(childComplexity int) int
 	}
@@ -110,6 +125,10 @@ type ComplexityRoot struct {
 
 type EstimateResolver interface {
 	Price(ctx context.Context, obj *models.Estimate, currency *models.Currency) (*models.Price, error)
+}
+type GetAirportResolver interface {
+	FuzzySearch(ctx context.Context, obj *models.GetAirport, query string) ([]*models.Airport, error)
+	FromIcao(ctx context.Context, obj *models.GetAirport, code string) (*models.Airport, error)
 }
 type GetEstimateResolver interface {
 	FromFlights(ctx context.Context, obj *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error)
@@ -129,6 +148,7 @@ type PaymentActionsResolver interface {
 type QueryResolver interface {
 	Health(ctx context.Context) (bool, error)
 	Estimate(ctx context.Context) (*models.GetEstimate, error)
+	Airport(ctx context.Context) (*models.GetAirport, error)
 }
 
 type executableSchema struct {
@@ -145,6 +165,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Airport.city":
+		if e.complexity.Airport.City == nil {
+			break
+		}
+
+		return e.complexity.Airport.City(childComplexity), true
+
+	case "Airport.country":
+		if e.complexity.Airport.Country == nil {
+			break
+		}
+
+		return e.complexity.Airport.Country(childComplexity), true
+
+	case "Airport.IATA":
+		if e.complexity.Airport.Iata == nil {
+			break
+		}
+
+		return e.complexity.Airport.Iata(childComplexity), true
+
+	case "Airport.ICAO":
+		if e.complexity.Airport.Icao == nil {
+			break
+		}
+
+		return e.complexity.Airport.Icao(childComplexity), true
+
+	case "Airport.name":
+		if e.complexity.Airport.Name == nil {
+			break
+		}
+
+		return e.complexity.Airport.Name(childComplexity), true
 
 	case "Estimate.carbon":
 		if e.complexity.Estimate.Carbon == nil {
@@ -192,6 +247,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Estimate.Provider(childComplexity), true
+
+	case "GetAirport.fromICAO":
+		if e.complexity.GetAirport.FromIcao == nil {
+			break
+		}
+
+		args, err := ec.field_GetAirport_fromICAO_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.GetAirport.FromIcao(childComplexity, args["code"].(string)), true
+
+	case "GetAirport.fuzzySearch":
+		if e.complexity.GetAirport.FuzzySearch == nil {
+			break
+		}
+
+		args, err := ec.field_GetAirport_fuzzySearch_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.GetAirport.FuzzySearch(childComplexity, args["query"].(string)), true
 
 	case "GetEstimate.fromFlights":
 		if e.complexity.GetEstimate.FromFlights == nil {
@@ -372,6 +451,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Purchase.ID(childComplexity), true
 
+	case "Query.airport":
+		if e.complexity.Query.Airport == nil {
+			break
+		}
+
+		return e.complexity.Query.Airport(childComplexity), true
+
 	case "Query.estimate":
 		if e.complexity.Query.Estimate == nil {
 			break
@@ -448,6 +534,19 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
+	&ast.Source{Name: "schema/airport.graphql", Input: `type GetAirport {
+    fuzzySearch(query: String!): [Airport]
+    fromICAO(code: String!): Airport
+}
+
+type Airport {
+    name: String!
+    ICAO: String!
+    IATA: String!
+    city: String!
+    country: String!
+}
+`},
 	&ast.Source{Name: "schema/estimate.graphql", Input: `type GetEstimate {
     fromFlights(flights: [Flight!]!, options: EstimateOptions = {}): Estimate
     fromID(id: ID, provider: Provider): Estimate
@@ -530,6 +629,7 @@ type Purchase {
 	&ast.Source{Name: "schema/root.graphql", Input: `type Query {
     health: Boolean!
     estimate: GetEstimate
+    airport: GetAirport
 }
 
 type Mutation {
@@ -554,6 +654,34 @@ func (ec *executionContext) field_Estimate_price_args(ctx context.Context, rawAr
 		}
 	}
 	args["currency"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_GetAirport_fromICAO_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["code"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["code"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_GetAirport_fuzzySearch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["query"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["query"] = arg0
 	return args, nil
 }
 
@@ -732,6 +860,191 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Airport_name(ctx context.Context, field graphql.CollectedField, obj *models.Airport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Airport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Airport_ICAO(ctx context.Context, field graphql.CollectedField, obj *models.Airport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Airport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Icao, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Airport_IATA(ctx context.Context, field graphql.CollectedField, obj *models.Airport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Airport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Iata, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Airport_city(ctx context.Context, field graphql.CollectedField, obj *models.Airport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Airport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.City, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Airport_country(ctx context.Context, field graphql.CollectedField, obj *models.Airport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Airport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Country, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _Estimate_id(ctx context.Context, field graphql.CollectedField, obj *models.Estimate) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -945,6 +1258,88 @@ func (ec *executionContext) _Estimate_details(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetAirport_fuzzySearch(ctx context.Context, field graphql.CollectedField, obj *models.GetAirport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GetAirport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_GetAirport_fuzzySearch_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.GetAirport().FuzzySearch(rctx, obj, args["query"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Airport)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOAirport2ᚕᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐAirport(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetAirport_fromICAO(ctx context.Context, field graphql.CollectedField, obj *models.GetAirport) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GetAirport",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_GetAirport_fromICAO_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.GetAirport().FromIcao(rctx, obj, args["code"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.Airport)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOAirport2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐAirport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _GetEstimate_fromFlights(ctx context.Context, field graphql.CollectedField, obj *models.GetEstimate) (ret graphql.Marshaler) {
@@ -1820,6 +2215,40 @@ func (ec *executionContext) _Query_estimate(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOGetEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_airport(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Airport(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*models.GetAirport)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOGetAirport2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetAirport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3144,6 +3573,53 @@ func (ec *executionContext) unmarshalInputPaymentOptions(ctx context.Context, ob
 
 // region    **************************** object.gotpl ****************************
 
+var airportImplementors = []string{"Airport"}
+
+func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, obj *models.Airport) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, airportImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Airport")
+		case "name":
+			out.Values[i] = ec._Airport_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ICAO":
+			out.Values[i] = ec._Airport_ICAO(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "IATA":
+			out.Values[i] = ec._Airport_IATA(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "city":
+			out.Values[i] = ec._Airport_city(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "country":
+			out.Values[i] = ec._Airport_country(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var estimateImplementors = []string{"Estimate"}
 
 func (ec *executionContext) _Estimate(ctx context.Context, sel ast.SelectionSet, obj *models.Estimate) graphql.Marshaler {
@@ -3179,6 +3655,50 @@ func (ec *executionContext) _Estimate(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Estimate_km(ctx, field, obj)
 		case "details":
 			out.Values[i] = ec._Estimate_details(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var getAirportImplementors = []string{"GetAirport"}
+
+func (ec *executionContext) _GetAirport(ctx context.Context, sel ast.SelectionSet, obj *models.GetAirport) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, getAirportImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetAirport")
+		case "fuzzySearch":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._GetAirport_fuzzySearch(ctx, field, obj)
+				return res
+			})
+		case "fromICAO":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._GetAirport_fromICAO(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3518,6 +4038,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_estimate(ctx, field)
+				return res
+			})
+		case "airport":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_airport(ctx, field)
 				return res
 			})
 		case "__type":
@@ -4103,6 +4634,57 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) marshalOAirport2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐAirport(ctx context.Context, sel ast.SelectionSet, v models.Airport) graphql.Marshaler {
+	return ec._Airport(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOAirport2ᚕᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐAirport(ctx context.Context, sel ast.SelectionSet, v []*models.Airport) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOAirport2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐAirport(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOAirport2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐAirport(ctx context.Context, sel ast.SelectionSet, v *models.Airport) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Airport(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -4194,6 +4776,17 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOFloat2float64(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOGetAirport2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetAirport(ctx context.Context, sel ast.SelectionSet, v models.GetAirport) graphql.Marshaler {
+	return ec._GetAirport(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOGetAirport2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetAirport(ctx context.Context, sel ast.SelectionSet, v *models.GetAirport) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetAirport(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOGetEstimate2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetEstimate(ctx context.Context, sel ast.SelectionSet, v models.GetEstimate) graphql.Marshaler {

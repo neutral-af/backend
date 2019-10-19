@@ -8,6 +8,14 @@ import (
 	"strconv"
 )
 
+type Airport struct {
+	Name    string `json:"name"`
+	Icao    string `json:"ICAO"`
+	Iata    string `json:"IATA"`
+	City    string `json:"city"`
+	Country string `json:"country"`
+}
+
 type Estimate struct {
 	ID       string    `json:"id"`
 	Price    *Price    `json:"price"`
@@ -26,6 +34,11 @@ type Flight struct {
 	Arrival      *string `json:"arrival"`
 	FlightNumber *string `json:"flightNumber"`
 	Date         *string `json:"date"`
+}
+
+type GetAirport struct {
+	FuzzySearch []*Airport `json:"fuzzySearch"`
+	FromIcao    *Airport   `json:"fromICAO"`
 }
 
 type GetEstimate struct {

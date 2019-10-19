@@ -12,6 +12,10 @@ func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
 }
 
+func (r *Resolver) GetAirport() generated.GetAirportResolver {
+	return &getAirportResolver{r}
+}
+
 func (r *Resolver) Estimate() generated.EstimateResolver {
 	return &estimateResolver{r}
 }
