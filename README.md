@@ -18,7 +18,7 @@ To run the dev server, copy the `.env.template` to a `.env` file. Add the necess
 
 This dev server starts an http dev server on port 8000, matching the http routing set up in production/staging by [Zeit](https://zeit.co).
 
-A [GraphQL playground](https://github.com/prisma-labs/graphql-playground) is also found on `/playground` (ie. http://localhost:8000/playground). You can try entering the query `{ health }` to test the playground's connection to the backend.
+A [GraphQL playground](https://github.com/prisma-labs/graphql-playground) is also found on `/playground` (ie. http://localhost:8000/playground). You can try entering the query `{ health { aliveSince environment } }` to test the playground's connection to the backend.
 
 To run the Go unit tests, use:
 
@@ -54,7 +54,7 @@ The keys you need will depend on what you're working on:
 
 Health check:
 
-    { health }
+    { health { aliveSince environment } }
 
 Estimate for a single flight:
 
