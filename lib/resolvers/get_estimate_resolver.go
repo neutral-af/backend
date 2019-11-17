@@ -68,10 +68,6 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 
 	beeline.AddField(ctx, "estimateID", estimate.ID)
 
-	// estimate, err := cloverlyToEstimate(estimateDetails)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	estimate.Km = &totalDistance
 
 	return estimate, nil
