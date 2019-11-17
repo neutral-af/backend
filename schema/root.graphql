@@ -1,5 +1,5 @@
 type Query {
-    health: Boolean!
+    health: Health!
     estimate: GetEstimate
     airport: GetAirport
 }

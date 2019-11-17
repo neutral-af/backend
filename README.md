@@ -42,7 +42,7 @@ When the schema changes, the generated Go types need to be updated as well. Afte
 
 ### Config & Credentials
 
-The environment variables required are specified in [config.go](lib/config/config.go). They need to be either exported in the environment or provided in a dotenv (`.env`) file. A `.env.template` file is provided as an example.
+The environment variables required are specified in [config.go](lib/config/config.go). They need to be either exported in the environment or provided in a dotenv (`.env`) file. If using environment variables, `DEV_` must be added as a prefix. A `.env.template` file is provided as an example.
 
 The keys you need will depend on what you're working on:
 

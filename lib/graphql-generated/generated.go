@@ -74,6 +74,11 @@ type ComplexityRoot struct {
 		FromID      func(childComplexity int, id *string, provider *models.Provider) int
 	}
 
+	Health struct {
+		AliveSince  func(childComplexity int) int
+		Environment func(childComplexity int) int
+	}
+
 	Mutation struct {
 		Payment func(childComplexity int) int
 	}
@@ -135,7 +140,7 @@ type PaymentActionsResolver interface {
 	Confirm(ctx context.Context, obj *models.PaymentActions, estimate models.EstimateIn, paymentIntent string, options *models.PaymentOptions) (*models.PaymentResponse, error)
 }
 type QueryResolver interface {
-	Health(ctx context.Context) (bool, error)
+	Health(ctx context.Context) (*models.Health, error)
 	Estimate(ctx context.Context) (*models.GetEstimate, error)
 	Airport(ctx context.Context) (*models.GetAirport, error)
 }
@@ -284,6 +289,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.GetEstimate.FromID(childComplexity, args["id"].(*string), args["provider"].(*models.Provider)), true
+
+	case "Health.aliveSince":
+		if e.complexity.Health.AliveSince == nil {
+			break
+		}
+
+		return e.complexity.Health.AliveSince(childComplexity), true
+
+	case "Health.environment":
+		if e.complexity.Health.Environment == nil {
+			break
+		}
+
+		return e.complexity.Health.Environment(childComplexity), true
 
 	case "Mutation.payment":
 		if e.complexity.Mutation.Payment == nil {
@@ -537,6 +556,11 @@ input EstimateOptions {
     provider: Provider = Cloverly # Default provider
 }
 `},
+	&ast.Source{Name: "schema/health.graphql", Input: `type Health {
+    aliveSince: Int!
+    environment: String!
+}
+`},
 	&ast.Source{Name: "schema/payment-purchase.graphql", Input: `type PaymentActions {
     checkout(estimate: EstimateIn!, paymentMethod: String!, amount: Int!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
     confirm(estimate: EstimateIn!, paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
@@ -591,7 +615,7 @@ type PriceElement {
     DigitalHumani   # http://digitalhumani.com/
 }`},
 	&ast.Source{Name: "schema/root.graphql", Input: `type Query {
-    health: Boolean!
+    health: Health!
     estimate: GetEstimate
     airport: GetAirport
 }
@@ -1381,6 +1405,80 @@ func (ec *executionContext) _GetEstimate_fromID(ctx context.Context, field graph
 	return ec.marshalOEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Health_aliveSince(ctx context.Context, field graphql.CollectedField, obj *models.Health) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Health",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AliveSince, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Health_environment(ctx context.Context, field graphql.CollectedField, obj *models.Health) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Health",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Environment, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_payment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2022,10 +2120,10 @@ func (ec *executionContext) _Query_health(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*models.Health)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNHealth2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐHealth(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_estimate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3623,6 +3721,38 @@ func (ec *executionContext) _GetEstimate(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var healthImplementors = []string{"Health"}
+
+func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, obj *models.Health) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, healthImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Health")
+		case "aliveSince":
+			out.Values[i] = ec._Health_aliveSince(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "environment":
+			out.Values[i] = ec._Health_environment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -4209,6 +4339,20 @@ func (ec *executionContext) unmarshalNFlight2ᚖgithubᚗcomᚋneutralᚑafᚋba
 	}
 	res, err := ec.unmarshalNFlight2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx, v)
 	return &res, err
+}
+
+func (ec *executionContext) marshalNHealth2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐHealth(ctx context.Context, sel ast.SelectionSet, v models.Health) graphql.Marshaler {
+	return ec._Health(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNHealth2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐHealth(ctx context.Context, sel ast.SelectionSet, v *models.Health) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Health(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

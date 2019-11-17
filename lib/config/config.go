@@ -8,7 +8,7 @@ import (
 )
 
 type config struct {
-	Environment     string `mapstructure:"ENVIRONMENT"`
+	Environment     string
 	CloverlyAPIKey  string `mapstructure:"CLOVERLY_API_KEY"`
 	HoneycombAPIKey string `mapstructure:"HONEYCOMB_API_KEY"`
 	StripeSecretKey string `mapstructure:"STRIPE_SECRET_KEY"`
@@ -17,17 +17,32 @@ type config struct {
 // C is the object containing config values
 var C config
 
+const branchEnvVar = "NOW_GITHUB_COMMIT_REF"
+
 func init() {
 	C = New()
 }
 
 func New() config {
+	var c config
+
 	if _, err := os.Stat(".env"); err == nil {
 		viper.SetConfigFile(".env")
 		viper.SetConfigType("dotenv")
 	}
 
-	viper.BindEnv("ENVIRONMENT")
+	ref := os.Getenv(branchEnvVar)
+	switch {
+	case ref == "master":
+		c.Environment = "prod"
+	case ref != "":
+		c.Environment = "staging"
+	default:
+		c.Environment = "dev"
+	}
+
+	viper.SetEnvPrefix(c.Environment)
+
 	viper.BindEnv("CLOVERLY_API_KEY")
 	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.BindEnv("STRIPE_SECRET_KEY")
@@ -39,7 +54,6 @@ func New() config {
 		}
 	}
 
-	var c config
 	viper.Unmarshal(&c)
 	return c
 }

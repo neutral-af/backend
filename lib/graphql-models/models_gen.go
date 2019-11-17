@@ -52,6 +52,11 @@ type GetEstimate struct {
 	FromID      *Estimate `json:"fromID"`
 }
 
+type Health struct {
+	AliveSince  int    `json:"aliveSince"`
+	Environment string `json:"environment"`
+}
+
 type PaymentActions struct {
 	Checkout *PaymentResponse `json:"checkout"`
 	Confirm  *PaymentResponse `json:"confirm"`

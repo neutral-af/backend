@@ -1,5 +1,6 @@
 schema:
 - schema/root.graphql
+- schema/health.graphql
 - schema/provider.graphql
 - schema/estimate.graphql
 - schema/payment-purchase.graphql
