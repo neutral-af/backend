@@ -12,7 +12,7 @@ dev:
 # `make deps` will fetch go deps, clean the modfile, and
 # rebuild the generated classes based on the GraphQL schema
 mod:
-	go get -v
+	go get -v all
 	go mod tidy
 
 gen:

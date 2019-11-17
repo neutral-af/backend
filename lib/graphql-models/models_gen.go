@@ -25,6 +25,12 @@ type Estimate struct {
 	Details  *string   `json:"details"`
 }
 
+type EstimateIn struct {
+	ID      *string          `json:"id"`
+	Carbon  *int             `json:"carbon"`
+	Options *EstimateOptions `json:"options"`
+}
+
 type EstimateOptions struct {
 	Provider *Provider `json:"provider"`
 }
@@ -46,10 +52,6 @@ type GetEstimate struct {
 	FromID      *Estimate `json:"fromID"`
 }
 
-type MakePurchase struct {
-	FromEstimate *Purchase `json:"fromEstimate"`
-}
-
 type PaymentActions struct {
 	Checkout *PaymentResponse `json:"checkout"`
 	Confirm  *PaymentResponse `json:"confirm"`
@@ -57,17 +59,15 @@ type PaymentActions struct {
 
 type PaymentOptions struct {
 	SaveCard   *bool   `json:"saveCard"`
-	EstimateID *string `json:"estimateID"`
 	CustomerID *string `json:"customerID"`
 }
 
 type PaymentResponse struct {
-	Success                   *bool    `json:"success"`
-	CustomerID                *string  `json:"customerID"`
-	RequiresAction            *bool    `json:"requiresAction"`
-	PaymentIntentClientSecret *string  `json:"paymentIntentClientSecret"`
-	PurchaseID                *string  `json:"purchaseID"`
-	PurchaseCarbon            *float64 `json:"purchaseCarbon"`
+	Success                   *bool     `json:"success"`
+	CustomerID                *string   `json:"customerID"`
+	RequiresAction            *bool     `json:"requiresAction"`
+	PaymentIntentClientSecret *string   `json:"paymentIntentClientSecret"`
+	Purchase                  *Purchase `json:"purchase"`
 }
 
 type Price struct {
@@ -83,7 +83,7 @@ type PriceElement struct {
 }
 
 type Purchase struct {
-	ID      string  `json:"id"`
+	ID      *string `json:"id"`
 	Carbon  int     `json:"carbon"`
 	Details *string `json:"details"`
 }

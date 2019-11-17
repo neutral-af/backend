@@ -1,0 +1,29 @@
+type PaymentActions {
+    checkout(estimate: EstimateIn!, paymentMethod: String!, amount: Int!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
+    confirm(estimate: EstimateIn!, paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
+}
+
+input EstimateIn {
+    id: ID
+    carbon: Int
+    options: EstimateOptions!
+}
+
+type Purchase {
+    id: ID
+    carbon: Int!
+    details: String
+}
+
+input PaymentOptions {
+    saveCard: Boolean
+    customerID: String
+}
+
+type PaymentResponse {
+    success: Boolean
+    customerID: String
+    requiresAction: Boolean
+    paymentIntentClientSecret: String
+    purchase: Purchase
+}

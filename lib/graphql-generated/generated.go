@@ -38,7 +38,6 @@ type ResolverRoot interface {
 	Estimate() EstimateResolver
 	GetAirport() GetAirportResolver
 	GetEstimate() GetEstimateResolver
-	MakePurchase() MakePurchaseResolver
 	Mutation() MutationResolver
 	PaymentActions() PaymentActionsResolver
 	Query() QueryResolver
@@ -75,25 +74,19 @@ type ComplexityRoot struct {
 		FromID      func(childComplexity int, id *string, provider *models.Provider) int
 	}
 
-	MakePurchase struct {
-		FromEstimate func(childComplexity int, estimateID *string, provider *models.Provider) int
-	}
-
 	Mutation struct {
-		Payment  func(childComplexity int) int
-		Purchase func(childComplexity int) int
+		Payment func(childComplexity int) int
 	}
 
 	PaymentActions struct {
-		Checkout func(childComplexity int, paymentMethod string, amount int, currency models.Currency, options *models.PaymentOptions) int
-		Confirm  func(childComplexity int, paymentIntent string, options *models.PaymentOptions) int
+		Checkout func(childComplexity int, estimate models.EstimateIn, paymentMethod string, amount int, currency models.Currency, options *models.PaymentOptions) int
+		Confirm  func(childComplexity int, estimate models.EstimateIn, paymentIntent string, options *models.PaymentOptions) int
 	}
 
 	PaymentResponse struct {
 		CustomerID                func(childComplexity int) int
 		PaymentIntentClientSecret func(childComplexity int) int
-		PurchaseCarbon            func(childComplexity int) int
-		PurchaseID                func(childComplexity int) int
+		Purchase                  func(childComplexity int) int
 		RequiresAction            func(childComplexity int) int
 		Success                   func(childComplexity int) int
 	}
@@ -134,16 +127,12 @@ type GetEstimateResolver interface {
 	FromFlights(ctx context.Context, obj *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error)
 	FromID(ctx context.Context, obj *models.GetEstimate, id *string, provider *models.Provider) (*models.Estimate, error)
 }
-type MakePurchaseResolver interface {
-	FromEstimate(ctx context.Context, obj *models.MakePurchase, estimateID *string, provider *models.Provider) (*models.Purchase, error)
-}
 type MutationResolver interface {
-	Purchase(ctx context.Context) (*models.MakePurchase, error)
 	Payment(ctx context.Context) (*models.PaymentActions, error)
 }
 type PaymentActionsResolver interface {
-	Checkout(ctx context.Context, obj *models.PaymentActions, paymentMethod string, amount int, currency models.Currency, options *models.PaymentOptions) (*models.PaymentResponse, error)
-	Confirm(ctx context.Context, obj *models.PaymentActions, paymentIntent string, options *models.PaymentOptions) (*models.PaymentResponse, error)
+	Checkout(ctx context.Context, obj *models.PaymentActions, estimate models.EstimateIn, paymentMethod string, amount int, currency models.Currency, options *models.PaymentOptions) (*models.PaymentResponse, error)
+	Confirm(ctx context.Context, obj *models.PaymentActions, estimate models.EstimateIn, paymentIntent string, options *models.PaymentOptions) (*models.PaymentResponse, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (bool, error)
@@ -296,31 +285,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetEstimate.FromID(childComplexity, args["id"].(*string), args["provider"].(*models.Provider)), true
 
-	case "MakePurchase.fromEstimate":
-		if e.complexity.MakePurchase.FromEstimate == nil {
-			break
-		}
-
-		args, err := ec.field_MakePurchase_fromEstimate_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MakePurchase.FromEstimate(childComplexity, args["estimateID"].(*string), args["provider"].(*models.Provider)), true
-
 	case "Mutation.payment":
 		if e.complexity.Mutation.Payment == nil {
 			break
 		}
 
 		return e.complexity.Mutation.Payment(childComplexity), true
-
-	case "Mutation.purchase":
-		if e.complexity.Mutation.Purchase == nil {
-			break
-		}
-
-		return e.complexity.Mutation.Purchase(childComplexity), true
 
 	case "PaymentActions.checkout":
 		if e.complexity.PaymentActions.Checkout == nil {
@@ -332,7 +302,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.PaymentActions.Checkout(childComplexity, args["paymentMethod"].(string), args["amount"].(int), args["currency"].(models.Currency), args["options"].(*models.PaymentOptions)), true
+		return e.complexity.PaymentActions.Checkout(childComplexity, args["estimate"].(models.EstimateIn), args["paymentMethod"].(string), args["amount"].(int), args["currency"].(models.Currency), args["options"].(*models.PaymentOptions)), true
 
 	case "PaymentActions.confirm":
 		if e.complexity.PaymentActions.Confirm == nil {
@@ -344,7 +314,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.PaymentActions.Confirm(childComplexity, args["paymentIntent"].(string), args["options"].(*models.PaymentOptions)), true
+		return e.complexity.PaymentActions.Confirm(childComplexity, args["estimate"].(models.EstimateIn), args["paymentIntent"].(string), args["options"].(*models.PaymentOptions)), true
 
 	case "PaymentResponse.customerID":
 		if e.complexity.PaymentResponse.CustomerID == nil {
@@ -360,19 +330,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PaymentResponse.PaymentIntentClientSecret(childComplexity), true
 
-	case "PaymentResponse.purchaseCarbon":
-		if e.complexity.PaymentResponse.PurchaseCarbon == nil {
+	case "PaymentResponse.purchase":
+		if e.complexity.PaymentResponse.Purchase == nil {
 			break
 		}
 
-		return e.complexity.PaymentResponse.PurchaseCarbon(childComplexity), true
-
-	case "PaymentResponse.purchaseID":
-		if e.complexity.PaymentResponse.PurchaseID == nil {
-			break
-		}
-
-		return e.complexity.PaymentResponse.PurchaseID(childComplexity), true
+		return e.complexity.PaymentResponse.Purchase(childComplexity), true
 
 	case "PaymentResponse.requiresAction":
 		if e.complexity.PaymentResponse.RequiresAction == nil {
@@ -574,14 +537,25 @@ input EstimateOptions {
     provider: Provider = Cloverly # Default provider
 }
 `},
-	&ast.Source{Name: "schema/payment.graphql", Input: `type PaymentActions {
-    checkout(paymentMethod: String!, amount: Int!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
-    confirm(paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
+	&ast.Source{Name: "schema/payment-purchase.graphql", Input: `type PaymentActions {
+    checkout(estimate: EstimateIn!, paymentMethod: String!, amount: Int!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
+    confirm(estimate: EstimateIn!, paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
+}
+
+input EstimateIn {
+    id: ID
+    carbon: Int
+    options: EstimateOptions!
+}
+
+type Purchase {
+    id: ID
+    carbon: Int!
+    details: String
 }
 
 input PaymentOptions {
     saveCard: Boolean
-    estimateID: String
     customerID: String
 }
 
@@ -590,8 +564,7 @@ type PaymentResponse {
     customerID: String
     requiresAction: Boolean
     paymentIntentClientSecret: String
-    purchaseID: String
-    purchaseCarbon: Float
+    purchase: Purchase
 }
 `},
 	&ast.Source{Name: "schema/price.graphql", Input: `enum Currency {
@@ -617,15 +590,6 @@ type PriceElement {
     Cloverly        # https://www.cloverly.com/
     DigitalHumani   # http://digitalhumani.com/
 }`},
-	&ast.Source{Name: "schema/purchase.graphql", Input: `type MakePurchase {
-    fromEstimate(estimateID: ID, provider: Provider): Purchase
-}
-
-type Purchase {
-    id: ID!
-    carbon: Int!
-    details: String
-}`},
 	&ast.Source{Name: "schema/root.graphql", Input: `type Query {
     health: Boolean!
     estimate: GetEstimate
@@ -633,7 +597,6 @@ type Purchase {
 }
 
 type Mutation {
-    purchase: MakePurchase
     payment: PaymentActions
 }
 `},
@@ -729,85 +692,79 @@ func (ec *executionContext) field_GetEstimate_fromID_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_MakePurchase_fromEstimate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["estimateID"]; ok {
-		arg0, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["estimateID"] = arg0
-	var arg1 *models.Provider
-	if tmp, ok := rawArgs["provider"]; ok {
-		arg1, err = ec.unmarshalOProvider2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐProvider(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["provider"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_PaymentActions_checkout_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 models.EstimateIn
+	if tmp, ok := rawArgs["estimate"]; ok {
+		arg0, err = ec.unmarshalNEstimateIn2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateIn(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["estimate"] = arg0
+	var arg1 string
 	if tmp, ok := rawArgs["paymentMethod"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["paymentMethod"] = arg0
-	var arg1 int
+	args["paymentMethod"] = arg1
+	var arg2 int
 	if tmp, ok := rawArgs["amount"]; ok {
-		arg1, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["amount"] = arg1
-	var arg2 models.Currency
+	args["amount"] = arg2
+	var arg3 models.Currency
 	if tmp, ok := rawArgs["currency"]; ok {
-		arg2, err = ec.unmarshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
+		arg3, err = ec.unmarshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["currency"] = arg2
-	var arg3 *models.PaymentOptions
+	args["currency"] = arg3
+	var arg4 *models.PaymentOptions
 	if tmp, ok := rawArgs["options"]; ok {
-		arg3, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
+		arg4, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["options"] = arg3
+	args["options"] = arg4
 	return args, nil
 }
 
 func (ec *executionContext) field_PaymentActions_confirm_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 models.EstimateIn
+	if tmp, ok := rawArgs["estimate"]; ok {
+		arg0, err = ec.unmarshalNEstimateIn2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateIn(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["estimate"] = arg0
+	var arg1 string
 	if tmp, ok := rawArgs["paymentIntent"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["paymentIntent"] = arg0
-	var arg1 *models.PaymentOptions
+	args["paymentIntent"] = arg1
+	var arg2 *models.PaymentOptions
 	if tmp, ok := rawArgs["options"]; ok {
-		arg1, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
+		arg2, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["options"] = arg1
+	args["options"] = arg2
 	return args, nil
 }
 
@@ -1424,81 +1381,6 @@ func (ec *executionContext) _GetEstimate_fromID(ctx context.Context, field graph
 	return ec.marshalOEstimate2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimate(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MakePurchase_fromEstimate(ctx context.Context, field graphql.CollectedField, obj *models.MakePurchase) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "MakePurchase",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_MakePurchase_fromEstimate_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MakePurchase().FromEstimate(rctx, obj, args["estimateID"].(*string), args["provider"].(*models.Provider))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.Purchase)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOPurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_purchase(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Purchase(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*models.MakePurchase)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMakePurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_payment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1559,7 +1441,7 @@ func (ec *executionContext) _PaymentActions_checkout(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PaymentActions().Checkout(rctx, obj, args["paymentMethod"].(string), args["amount"].(int), args["currency"].(models.Currency), args["options"].(*models.PaymentOptions))
+		return ec.resolvers.PaymentActions().Checkout(rctx, obj, args["estimate"].(models.EstimateIn), args["paymentMethod"].(string), args["amount"].(int), args["currency"].(models.Currency), args["options"].(*models.PaymentOptions))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1600,7 +1482,7 @@ func (ec *executionContext) _PaymentActions_confirm(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PaymentActions().Confirm(rctx, obj, args["paymentIntent"].(string), args["options"].(*models.PaymentOptions))
+		return ec.resolvers.PaymentActions().Confirm(rctx, obj, args["estimate"].(models.EstimateIn), args["paymentIntent"].(string), args["options"].(*models.PaymentOptions))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1751,7 +1633,7 @@ func (ec *executionContext) _PaymentResponse_paymentIntentClientSecret(ctx conte
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _PaymentResponse_purchaseID(ctx context.Context, field graphql.CollectedField, obj *models.PaymentResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _PaymentResponse_purchase(ctx context.Context, field graphql.CollectedField, obj *models.PaymentResponse) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1770,7 +1652,7 @@ func (ec *executionContext) _PaymentResponse_purchaseID(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PurchaseID, nil
+		return obj.Purchase, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1779,44 +1661,10 @@ func (ec *executionContext) _PaymentResponse_purchaseID(ctx context.Context, fie
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*models.Purchase)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _PaymentResponse_purchaseCarbon(ctx context.Context, field graphql.CollectedField, obj *models.PaymentResponse) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "PaymentResponse",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PurchaseCarbon, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*float64)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+	return ec.marshalOPurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPurchase(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Price_currency(ctx context.Context, field graphql.CollectedField, obj *models.Price) (ret graphql.Marshaler) {
@@ -2064,15 +1912,12 @@ func (ec *executionContext) _Purchase_id(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Purchase_carbon(ctx context.Context, field graphql.CollectedField, obj *models.Purchase) (ret graphql.Marshaler) {
@@ -3477,6 +3322,36 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputEstimateIn(ctx context.Context, obj interface{}) (models.EstimateIn, error) {
+	var it models.EstimateIn
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "carbon":
+			var err error
+			it.Carbon, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "options":
+			var err error
+			it.Options, err = ec.unmarshalNEstimateOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputEstimateOptions(ctx context.Context, obj interface{}) (models.EstimateOptions, error) {
 	var it models.EstimateOptions
 	var asMap = obj.(map[string]interface{})
@@ -3544,12 +3419,6 @@ func (ec *executionContext) unmarshalInputPaymentOptions(ctx context.Context, ob
 		case "saveCard":
 			var err error
 			it.SaveCard, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "estimateID":
-			var err error
-			it.EstimateID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3754,39 +3623,6 @@ func (ec *executionContext) _GetEstimate(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-var makePurchaseImplementors = []string{"MakePurchase"}
-
-func (ec *executionContext) _MakePurchase(ctx context.Context, sel ast.SelectionSet, obj *models.MakePurchase) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, makePurchaseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MakePurchase")
-		case "fromEstimate":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MakePurchase_fromEstimate(ctx, field, obj)
-				return res
-			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3802,8 +3638,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "purchase":
-			out.Values[i] = ec._Mutation_purchase(ctx, field)
 		case "payment":
 			out.Values[i] = ec._Mutation_payment(ctx, field)
 		default:
@@ -3880,10 +3714,8 @@ func (ec *executionContext) _PaymentResponse(ctx context.Context, sel ast.Select
 			out.Values[i] = ec._PaymentResponse_requiresAction(ctx, field, obj)
 		case "paymentIntentClientSecret":
 			out.Values[i] = ec._PaymentResponse_paymentIntentClientSecret(ctx, field, obj)
-		case "purchaseID":
-			out.Values[i] = ec._PaymentResponse_purchaseID(ctx, field, obj)
-		case "purchaseCarbon":
-			out.Values[i] = ec._PaymentResponse_purchaseCarbon(ctx, field, obj)
+		case "purchase":
+			out.Values[i] = ec._PaymentResponse_purchase(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3979,9 +3811,6 @@ func (ec *executionContext) _Purchase(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("Purchase")
 		case "id":
 			out.Values[i] = ec._Purchase_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "carbon":
 			out.Values[i] = ec._Purchase_carbon(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4332,6 +4161,22 @@ func (ec *executionContext) unmarshalNCurrency2githubᚗcomᚋneutralᚑafᚋbac
 
 func (ec *executionContext) marshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx context.Context, sel ast.SelectionSet, v models.Currency) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNEstimateIn2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateIn(ctx context.Context, v interface{}) (models.EstimateIn, error) {
+	return ec.unmarshalInputEstimateIn(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNEstimateOptions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx context.Context, v interface{}) (models.EstimateOptions, error) {
+	return ec.unmarshalInputEstimateOptions(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNEstimateOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx context.Context, v interface{}) (*models.EstimateOptions, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNEstimateOptions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐEstimateOptions(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNFlight2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐFlight(ctx context.Context, v interface{}) (models.Flight, error) {
@@ -4755,29 +4600,6 @@ func (ec *executionContext) unmarshalOEstimateOptions2ᚖgithubᚗcomᚋneutral�
 	return &res, err
 }
 
-func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
-	return graphql.UnmarshalFloat(v)
-}
-
-func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-	return graphql.MarshalFloat(v)
-}
-
-func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOFloat2float64(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalOFloat2float64(ctx, sel, *v)
-}
-
 func (ec *executionContext) marshalOGetAirport2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐGetAirport(ctx context.Context, sel ast.SelectionSet, v models.GetAirport) graphql.Marshaler {
 	return ec._GetAirport(ctx, sel, &v)
 }
@@ -4844,17 +4666,6 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return ec.marshalOInt2int(ctx, sel, *v)
-}
-
-func (ec *executionContext) marshalOMakePurchase2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v models.MakePurchase) graphql.Marshaler {
-	return ec._MakePurchase(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOMakePurchase2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐMakePurchase(ctx context.Context, sel ast.SelectionSet, v *models.MakePurchase) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._MakePurchase(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOPaymentActions2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentActions(ctx context.Context, sel ast.SelectionSet, v models.PaymentActions) graphql.Marshaler {

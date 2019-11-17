@@ -2,8 +2,7 @@ schema:
 - schema/root.graphql
 - schema/provider.graphql
 - schema/estimate.graphql
-- schema/purchase.graphql
-- schema/payment.graphql
+- schema/payment-purchase.graphql
 - schema/price.graphql
 - schema/airport.graphql
 exec:
