@@ -10,10 +10,12 @@
         { "src": "/.*", "status": 404 }
     ],
     "env": {
-        "ENVIRONMENT": "staging",
-        "CLOVERLY_API_KEY": "@cloverly_api_key",
-        "HONEYCOMB_API_KEY": "@honeycomb_api_key",
-        "STRIPE_SECRET_KEY": "@stripe_secret_key"
+        "DEV_CLOVERLY_API_KEY": "@dev_cloverly_api_key",
+        "PROD_CLOVERLY_API_KEY": "@dev_cloverly_api_key",
+        "DEV_HONEYCOMB_API_KEY": "@honeycomb_api_key",
+        "PROD_HONEYCOMB_API_KEY": "@honeycomb_api_key",
+        "DEV_STRIPE_SECRET_KEY": "@dev_stripe_secret_key",
+        "PROD_STRIPE_SECRET_KEY": "@dev_stripe_secret_key"
     },
     "regions": ["bru"],
     "public": false
