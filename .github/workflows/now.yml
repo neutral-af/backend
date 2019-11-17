@@ -6,11 +6,12 @@ jobs:
     name: preview-env
     runs-on: ubuntu-latest
     steps:
-    - env:
-        ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
     - uses: actions/checkout@v1
 
-    - run: >
+    - name: Deploy to preview environment
+      env:
+        ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
+      run: >
         now deploy
         --local-config=./now.json
         --meta GIT_SHA=${{ github.sha }}
