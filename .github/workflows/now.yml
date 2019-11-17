@@ -3,13 +3,14 @@ on: [pull_request]
 jobs:
 
   now-preview:
-    name: Deploy to preview environment
+    name: preview-env
     runs-on: ubuntu-latest
     steps:
     - env:
         ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
+    - uses: actions/checkout@v1
 
-      run: >
+    - run: >
         now deploy
         --local-config=./now.json
         --meta GIT_SHA=${{ github.sha }}
