@@ -7,8 +7,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Environment string
+
+func (e Environment) ToString() string {
+	return string(e)
+}
+
+const (
+	EnvironmentProd    = "prod"
+	EnvironmentStaging = "staging"
+	EnvironmentDev     = "dev"
+)
+
 type config struct {
-	Environment     string
+	Environment     Environment
 	CloverlyAPIKey  string `mapstructure:"CLOVERLY_API_KEY"`
 	HoneycombAPIKey string `mapstructure:"HONEYCOMB_API_KEY"`
 	StripeSecretKey string `mapstructure:"STRIPE_SECRET_KEY"`
@@ -34,14 +46,14 @@ func New() config {
 	ref := os.Getenv(branchEnvVar)
 	switch {
 	case ref == "master":
-		c.Environment = "prod"
+		c.Environment = EnvironmentProd
 	case ref != "":
-		c.Environment = "staging"
+		c.Environment = EnvironmentStaging
 	default:
-		c.Environment = "dev"
+		c.Environment = EnvironmentDev
 	}
 
-	viper.SetEnvPrefix(c.Environment)
+	viper.SetEnvPrefix(c.Environment.ToString())
 
 	viper.BindEnv("CLOVERLY_API_KEY")
 	viper.BindEnv("HONEYCOMB_API_KEY")

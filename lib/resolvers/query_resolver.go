@@ -19,7 +19,7 @@ func (r *queryResolver) Health(ctx context.Context) (*models.Health, error) {
 
 	return &models.Health{
 		AliveSince:  int(startTime.Unix()),
-		Environment: config.C.Environment,
+		Environment: config.C.Environment.ToString(),
 	}, nil
 }
 

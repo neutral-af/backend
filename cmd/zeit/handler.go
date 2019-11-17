@@ -30,7 +30,7 @@ func init() {
 func Handler(w http.ResponseWriter, r *http.Request) {
 	var origins []string
 
-	if config.C.Environment == "prod" {
+	if config.C.Environment == config.EnvironmentProd {
 		origins = []string{"https://neutral.af", "https://*.neutral-af.now.sh"}
 	} else {
 		origins = []string{"*"}
