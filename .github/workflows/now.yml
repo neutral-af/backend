@@ -1,0 +1,66 @@
+name: deploy
+on: [pull_request]
+jobs:
+
+  now-preview:
+    name: Deploy to preview environment
+    runs-on: ubuntu-latest
+    steps:
+    - env:
+        ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
+
+      run: >
+        now deploy
+        --local-config=./now.json
+        --meta GIT_SHA=${{ github.sha }}
+        --token ${ZEIT_TOKEN}
+        --no-clipboard
+        > ${HOME}/deployment-url.txt
+
+    - name: Alias with PR number
+      env:
+        ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
+      run: >
+        now alias
+        --local-config=./now.json
+        --token ${ZEIT_TOKEN}
+        `cat ${HOME}/deployment-url.txt`
+        ${{ github.event.repository.name }}-pr-${{ github.event.number }}.now.sh
+
+
+
+
+
+
+
+
+
+
+  gqlgen:
+    name: gqlgen
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+    - uses: actions/checkout@v1
+    - name: check if gqlgen has a diff
+      run: |
+        export GOPATH=$(go env GOPATH)
+        export PATH="$PATH:$GOPATH/bin"
+
+        go install github.com/99designs/gqlgen
+
+        make gen
+
+        git diff --exit-code || (echo -e "\n\nPlease update the generated code (by running 'make deps')." && exit 1)
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+    - uses: actions/checkout@v1
+    - run: make test
