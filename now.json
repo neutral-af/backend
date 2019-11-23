@@ -11,11 +11,11 @@
     ],
     "env": {
         "DEV_CLOVERLY_API_KEY": "@dev_cloverly_api_key",
-        "PROD_CLOVERLY_API_KEY": "@dev_cloverly_api_key",
+        "PROD_CLOVERLY_API_KEY": "@prod_cloverly_api_key",
         "DEV_HONEYCOMB_API_KEY": "@honeycomb_api_key",
         "PROD_HONEYCOMB_API_KEY": "@honeycomb_api_key",
         "DEV_STRIPE_SECRET_KEY": "@dev_stripe_secret_key",
-        "PROD_STRIPE_SECRET_KEY": "@dev_stripe_secret_key"
+        "PROD_STRIPE_SECRET_KEY": "@prod_stripe_secret_key"
     },
     "regions": ["bru"],
     "public": false
