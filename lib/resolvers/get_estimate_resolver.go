@@ -6,12 +6,12 @@ import (
 	"math"
 
 	"github.com/honeycombio/beeline-go"
-	"github.com/neutral-af/backend/lib/digitalhumani"
 	"github.com/neutral-af/backend/lib/distance"
 	"github.com/neutral-af/backend/lib/emissions"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	providers "github.com/neutral-af/backend/lib/offset-providers"
 	"github.com/neutral-af/backend/lib/offset-providers/cloverly"
+	"github.com/neutral-af/backend/lib/offset-providers/digitalhumani"
 )
 
 var cloverlyAPI cloverly.Cloverly
