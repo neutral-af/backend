@@ -7,8 +7,20 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Environment string
+
+func (e Environment) ToString() string {
+	return string(e)
+}
+
+const (
+	EnvironmentProd    = "prod"
+	EnvironmentStaging = "staging"
+	EnvironmentDev     = "dev"
+)
+
 type config struct {
-	Environment               string `mapstructure:"ENVIRONMENT"`
+	Environment               Environment
 	CloverlyAPIKey            string `mapstructure:"CLOVERLY_API_KEY"`
 	DigitalHumaniEnterpriseID string `mapstructure:"DIGITALHUMANI_ENTERPRISE_ID"`
 	HoneycombAPIKey           string `mapstructure:"HONEYCOMB_API_KEY"`
@@ -18,17 +30,32 @@ type config struct {
 // C is the object containing config values
 var C config
 
+const branchEnvVar = "NOW_GITHUB_COMMIT_REF"
+
 func init() {
 	C = New()
 }
 
 func New() config {
+	var c config
+
 	if _, err := os.Stat(".env"); err == nil {
 		viper.SetConfigFile(".env")
 		viper.SetConfigType("dotenv")
 	}
 
-	viper.BindEnv("ENVIRONMENT")
+	ref := os.Getenv(branchEnvVar)
+	switch {
+	case ref == "master":
+		c.Environment = EnvironmentProd
+	case ref != "":
+		c.Environment = EnvironmentStaging
+	default:
+		c.Environment = EnvironmentDev
+	}
+
+	viper.SetEnvPrefix(c.Environment.ToString())
+
 	viper.BindEnv("CLOVERLY_API_KEY")
 	viper.BindEnv("DIGITALHUMANI_ENTERPRISE_ID")
 	viper.BindEnv("HONEYCOMB_API_KEY")
@@ -41,7 +68,6 @@ func New() config {
 		}
 	}
 
-	var c config
 	viper.Unmarshal(&c)
 	return c
 }

@@ -1,9 +1,0 @@
-type MakePurchase {
-    fromEstimate(estimateID: ID, provider: Provider): Purchase
-}
-
-type Purchase {
-    id: ID!
-    carbon: Int!
-    details: String
-}

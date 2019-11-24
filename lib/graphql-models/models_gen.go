@@ -8,6 +8,14 @@ import (
 	"strconv"
 )
 
+type Airport struct {
+	Name    string `json:"name"`
+	Icao    string `json:"ICAO"`
+	Iata    string `json:"IATA"`
+	City    string `json:"city"`
+	Country string `json:"country"`
+}
+
 type Estimate struct {
 	ID       string    `json:"id"`
 	Price    *Price    `json:"price"`
@@ -15,6 +23,12 @@ type Estimate struct {
 	Carbon   *int      `json:"carbon"`
 	Km       *int      `json:"km"`
 	Details  *string   `json:"details"`
+}
+
+type EstimateIn struct {
+	ID      *string          `json:"id"`
+	Carbon  *int             `json:"carbon"`
+	Options *EstimateOptions `json:"options"`
 }
 
 type EstimateOptions struct {
@@ -28,13 +42,19 @@ type Flight struct {
 	Date         *string `json:"date"`
 }
 
+type GetAirport struct {
+	Search   []*Airport `json:"search"`
+	FromIcao *Airport   `json:"fromICAO"`
+}
+
 type GetEstimate struct {
 	FromFlights *Estimate `json:"fromFlights"`
 	FromID      *Estimate `json:"fromID"`
 }
 
-type MakePurchase struct {
-	FromEstimate *Purchase `json:"fromEstimate"`
+type Health struct {
+	AliveSince  int    `json:"aliveSince"`
+	Environment string `json:"environment"`
 }
 
 type PaymentActions struct {
@@ -44,17 +64,15 @@ type PaymentActions struct {
 
 type PaymentOptions struct {
 	SaveCard   *bool   `json:"saveCard"`
-	EstimateID *string `json:"estimateID"`
 	CustomerID *string `json:"customerID"`
 }
 
 type PaymentResponse struct {
-	Success                   *bool    `json:"success"`
-	CustomerID                *string  `json:"customerID"`
-	RequiresAction            *bool    `json:"requiresAction"`
-	PaymentIntentClientSecret *string  `json:"paymentIntentClientSecret"`
-	PurchaseID                *string  `json:"purchaseID"`
-	PurchaseCarbon            *float64 `json:"purchaseCarbon"`
+	Success                   *bool     `json:"success"`
+	CustomerID                *string   `json:"customerID"`
+	RequiresAction            *bool     `json:"requiresAction"`
+	PaymentIntentClientSecret *string   `json:"paymentIntentClientSecret"`
+	Purchase                  *Purchase `json:"purchase"`
 }
 
 type Price struct {
@@ -70,7 +88,7 @@ type PriceElement struct {
 }
 
 type Purchase struct {
-	ID      string  `json:"id"`
+	ID      *string `json:"id"`
 	Carbon  int     `json:"carbon"`
 	Details *string `json:"details"`
 }

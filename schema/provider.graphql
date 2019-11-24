@@ -1,0 +1,4 @@
+enum Provider {
+    Cloverly        # https://www.cloverly.com/
+    DigitalHumani   # http://digitalhumani.com/
+}

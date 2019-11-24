@@ -1,7 +1,6 @@
 {
     "version": 2,
     "name": "backend",
-    "alias": ["api.neutral.af"],
     "builds": [
         { "src": "cmd/zeit/handler.go", "use": "@now/go" }
     ],
@@ -10,10 +9,12 @@
         { "src": "/.*", "status": 404 }
     ],
     "env": {
-        "ENVIRONMENT": "prod",
-        "CLOVERLY_API_KEY": "@cloverly_api_key",
-        "HONEYCOMB_API_KEY": "@honeycomb_api_key",
-        "STRIPE_SECRET_KEY": "@stripe_secret_key"
+        "STAGING_CLOVERLY_API_KEY": "@staging_cloverly_api_key",
+        "PROD_CLOVERLY_API_KEY": "@prod_cloverly_api_key",
+        "STAGING_HONEYCOMB_API_KEY": "@honeycomb_api_key",
+        "PROD_HONEYCOMB_API_KEY": "@honeycomb_api_key",
+        "STAGING_STRIPE_SECRET_KEY": "@staging_stripe_secret_key",
+        "PROD_STRIPE_SECRET_KEY": "@prod_stripe_secret_key"
     },
     "regions": ["bru"],
     "public": false

@@ -1,0 +1,12 @@
+type GetAirport {
+    search(query: String!): [Airport]
+    fromICAO(code: String!): Airport
+}
+
+type Airport {
+    name: String!
+    ICAO: String!
+    IATA: String!
+    city: String!
+    country: String!
+}

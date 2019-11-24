@@ -57,7 +57,8 @@ func Checkout(paymentMethod string, amount int, currency models.Currency, opts *
 		ConfirmationMethod: stripe.String(string(
 			stripe.PaymentIntentConfirmationMethodManual,
 		)),
-		Confirm: stripe.Bool(true),
+		Confirm:             stripe.Bool(true),
+		StatementDescriptor: stripe.String("Neutral.af"),
 	}
 
 	if opts != nil && opts.CustomerID != nil {

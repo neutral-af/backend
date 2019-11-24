@@ -1,4 +1,4 @@
-.PHONY: dev deps test
+.PHONY: dev deps mod gen test deploy
 
 test:
 	go test ./... -cover
@@ -11,10 +11,14 @@ dev:
 
 # `make deps` will fetch go deps, clean the modfile, and
 # rebuild the generated classes based on the GraphQL schema
-deps:
-	go get -v
+mod:
+	go get -v all
 	go mod tidy
+
+gen:
 	gqlgen
+
+deps: mod gen
 
 deploy:
 	now

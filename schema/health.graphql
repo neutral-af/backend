@@ -1,0 +1,4 @@
+type Health {
+    aliveSince: Int!
+    environment: String!
+}

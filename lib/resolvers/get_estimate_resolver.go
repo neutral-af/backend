@@ -6,12 +6,12 @@ import (
 	"math"
 
 	"github.com/honeycombio/beeline-go"
-	"github.com/neutral-af/backend/lib/cloverly"
 	"github.com/neutral-af/backend/lib/digitalhumani"
 	"github.com/neutral-af/backend/lib/distance"
 	"github.com/neutral-af/backend/lib/emissions"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	providers "github.com/neutral-af/backend/lib/offset-providers"
+	"github.com/neutral-af/backend/lib/offset-providers/cloverly"
 )
 
 var cloverlyAPI cloverly.Cloverly
@@ -33,6 +33,9 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 
 	for _, f := range flights {
 		if f.Departure != nil && *f.Departure != "" && f.Arrival != nil && *f.Arrival != "" {
+			if *f.Departure == *f.Arrival {
+				return nil, errors.New("Departure and Arrival cannot be the same")
+			}
 			distance, err := distance.TwoAirports(*f.Departure, *f.Arrival)
 			if err != nil {
 				return nil, err
@@ -71,10 +74,6 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 
 	beeline.AddField(ctx, "estimateID", estimate.ID)
 
-	// estimate, err := cloverlyToEstimate(estimateDetails)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	estimate.Km = &totalDistance
 
 	return estimate, nil
