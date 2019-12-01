@@ -35,7 +35,7 @@ func New() FlightStats {
 
 func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) (Details, error) {
 	reMatches := flightNumberRegex.FindStringSubmatch(flightNumber)
-	path := fmt.Sprintf("/%s/%s/departing/%s/%s/%s", reMatches[0], reMatches[1], date.Year(), date.Month(), date.Day())
+	path := fmt.Sprintf("/%s/%s/departing/%d/%d/%d", reMatches[0], reMatches[1], date.Year(), date.Month(), date.Day())
 	resp, err := grequests.Get(baseURL+path, &grequests.RequestOptions{
 		Params: f.authParams,
 	})
