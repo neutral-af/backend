@@ -7,12 +7,24 @@ import (
 	"time"
 
 	"github.com/levigross/grequests"
+	"github.com/neutral-af/backend/lib/airports"
 	"github.com/neutral-af/backend/lib/config"
 )
 
 const baseURL = "https://api.flightstats.com/flex/schedules/rest/v1/json/flight"
 
 var flightNumberRegex = regexp.MustCompile("([A-Z]+)([0-9]+)")
+
+func splitFlightNumber(flightNumber string) (airline string, flight string, err error) {
+	// The first element will be the whole string, successive elements are capture groups
+	reMatches := flightNumberRegex.FindStringSubmatch(flightNumber)
+
+	if len(reMatches) < 3 || reMatches[1] == "" || reMatches[2] == "" {
+		return "", "", fmt.Errorf("Unable to parse airline and number from flight number: %s", flightNumber)
+	}
+
+	return reMatches[1], reMatches[2], nil
+}
 
 type FlightStats struct {
 	baseURL    string
@@ -34,8 +46,15 @@ func New() FlightStats {
 }
 
 func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) (Details, error) {
-	reMatches := flightNumberRegex.FindStringSubmatch(flightNumber)
-	path := fmt.Sprintf("/%s/%s/departing/%d/%d/%d", reMatches[0], reMatches[1], date.Year(), date.Month(), date.Day())
+	if date.Before(time.Now()) {
+		return Details{}, fmt.Errorf("Cannot process flight for date because it is in the past: %s", date.Format("2006-01-02 15:04:05"))
+	}
+
+	airlineCode, flightCode, err := splitFlightNumber(flightNumber)
+	if err != nil {
+		return Details{}, err
+	}
+	path := fmt.Sprintf("/%s/%s/departing/%d/%d/%d", airlineCode, flightCode, date.Year(), date.Month(), date.Day())
 	resp, err := grequests.Get(baseURL+path, &grequests.RequestOptions{
 		Params: f.authParams,
 	})
@@ -52,11 +71,23 @@ func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) 
 		return Details{}, fmt.Errorf("Error in FlightStats call: %w", errors.New(responseData.Error.ErrorMessage))
 	}
 
-	// todo: parse real values
-	return Details{"EGLL", "EGDY"}, nil
+	departureAirport, err := airports.GetFromIATA(responseData.ScheduledFlights[0].DepartureAirportFsCode)
+	if err != nil {
+		return Details{}, err
+	}
+	ArrivalAirport, err := airports.GetFromIATA(responseData.ScheduledFlights[0].ArrivalAirportFsCode)
+	if err != nil {
+		return Details{}, err
+	}
+
+	return Details{departureAirport.ICAO, ArrivalAirport.ICAO}, nil
 }
 
 type Response struct {
+	ScheduledFlights []struct {
+		DepartureAirportFsCode string `json:"departureAirportFsCode"`
+		ArrivalAirportFsCode   string `json:"arrivalAirportFsCode"`
+	} `json:"scheduledFlights"`
 	Error struct {
 		HTTPStatusCode int
 		ErrorMessage   string

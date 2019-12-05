@@ -1,7 +1,6 @@
 package airports
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/mmcloughlin/openflights"
@@ -34,13 +33,17 @@ func (a Airport) ToModel() models.Airport {
 
 var allAirports Airports
 var airportsByICAO map[string]Airport
+var airportsByIATA map[string]Airport
 
 func init() {
 	airportsByICAO = make(map[string]Airport)
+	airportsByIATA = make(map[string]Airport)
 	for _, i := range openflights.Airports {
 		allAirports = append(allAirports, Airport(i))
 		airportsByICAO[i.ICAO] = Airport(i)
+		airportsByIATA[i.IATA] = Airport(i)
 	}
+
 }
 
 func GetAll() Airports {
@@ -51,7 +54,17 @@ func GetFromICAO(code string) (Airport, error) {
 	a, ok := airportsByICAO[code]
 
 	if !ok {
-		return Airport{}, errors.New("Airport for code not found")
+		return Airport{}, fmt.Errorf("Airport for code not found: %s", code)
+	}
+
+	return a, nil
+}
+
+func GetFromIATA(code string) (Airport, error) {
+	a, ok := airportsByIATA[code]
+
+	if !ok {
+		return Airport{}, fmt.Errorf("Airport for code not found: %s", code)
 	}
 
 	return a, nil
