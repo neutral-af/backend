@@ -44,23 +44,37 @@ func New() FlightStats {
 	}
 }
 
-func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) (Details, error) {
-	var path string
+func buildAPIPath(flightNumber string, date time.Time) (string, error) {
 	airlineCode, flightCode, err := splitFlightNumber(flightNumber)
-	if date.Before(time.Now()) {
-		// Use historical API
+	if err != nil {
+		return "", err
+	}
+
+	var path string
+	if date.Before(time.Now().Add(-time.Hour * 24 * 7)) {
+		return "", fmt.Errorf(
+			`Flight number lookups can only be for flights in the future or in the past 7 days (got date: %s).
+			For flights more than 7 days old, use the departure/arrival airports search instead`,
+			date.Format("2006-01-02"),
+		)
+	} else if date.Before(time.Now().Add(time.Hour * 24 * 3)) {
+		// "Flight Status API" contains previous 7 days and next 3 days
 		path = fmt.Sprintf(
-			"/flex/flightstatus/historical/rest/v3/json/flight/status/%s/%s/dep/%d/%d/%d",
+			"/flex/flightstatus/rest/v2/json/flight/status/%s/%s/dep/%d/%d/%d",
 			airlineCode, flightCode, date.Year(), date.Month(), date.Day(),
 		)
 	} else {
-		// Use schedules API
+		// Use "Schedules API" for flights more than 3 days in the future
 		path = fmt.Sprintf(
 			"/flex/schedules/rest/v1/json/flight/%s/%s/departing/%d/%d/%d",
 			airlineCode, flightCode, date.Year(), date.Month(), date.Day(),
 		)
 	}
+	return path, nil
+}
 
+func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) (Details, error) {
+	path, err := buildAPIPath(flightNumber, date)
 	if err != nil {
 		return Details{}, err
 	}

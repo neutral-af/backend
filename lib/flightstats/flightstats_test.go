@@ -28,9 +28,39 @@ func TestSplitFlightNumberEmpty(t *testing.T) {
 	assert.Empty(t, flight)
 }
 
-func TestGetAirportsForFlightFailPast(t *testing.T) {
+func TestBuildAPIPathTooOld(t *testing.T) {
+	path, err := buildAPIPath("AC123", time.Now().Add(-time.Hour*24*8))
+	assert.Empty(t, path)
+	assert.Error(t, err)
+}
+
+func TestBuildAPIPathFarFuture(t *testing.T) {
+	path, err := buildAPIPath("AC123", time.Now().Add(time.Hour*24*90))
+	assert.NoError(t, err)
+	assert.Contains(t, path, "schedules")
+}
+
+func TestBuildAPIPathToday(t *testing.T) {
+	path, err := buildAPIPath("AC123", time.Now())
+	assert.NoError(t, err)
+	assert.Contains(t, path, "flightstatus")
+}
+
+func TestBuildAPIPathThreeDaysFuture(t *testing.T) {
+	path, err := buildAPIPath("AC123", time.Now().Add(time.Hour*24*3))
+	assert.NoError(t, err)
+	assert.Contains(t, path, "flightstatus")
+}
+
+func TestBuildAPIPathFourDaysFuture(t *testing.T) {
+	path, err := buildAPIPath("AC123", time.Now().Add(time.Hour*24*4))
+	assert.NoError(t, err)
+	assert.Contains(t, path, "schedules")
+}
+
+func TestGetAirportsForFlightTooOld(t *testing.T) {
 	f := New()
-	details, err := f.GetAirportsForFlight("", time.Now().Add(-time.Hour))
+	details, err := f.GetAirportsForFlight("AC123", time.Now().Add(-time.Hour*24*8))
 	assert.Empty(t, details)
 	assert.Error(t, err)
 }
