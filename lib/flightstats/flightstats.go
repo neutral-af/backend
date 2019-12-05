@@ -7,11 +7,10 @@ import (
 	"time"
 
 	"github.com/levigross/grequests"
-	"github.com/neutral-af/backend/lib/airports"
 	"github.com/neutral-af/backend/lib/config"
 )
 
-const baseURL = "https://api.flightstats.com/flex/schedules/rest/v1/json/flight"
+const baseURL = "https://api.flightstats.com"
 
 var flightNumberRegex = regexp.MustCompile("([A-Z]+)([0-9]+)")
 
@@ -46,15 +45,25 @@ func New() FlightStats {
 }
 
 func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) (Details, error) {
+	var path string
+	airlineCode, flightCode, err := splitFlightNumber(flightNumber)
 	if date.Before(time.Now()) {
-		return Details{}, fmt.Errorf("Cannot process flight for date because it is in the past: %s", date.Format("2006-01-02 15:04:05"))
+		// Use historical API
+		path = fmt.Sprintf(
+			"/flex/flightstatus/historical/rest/v3/json/flight/status/%s/%s/dep/%d/%d/%d",
+			airlineCode, flightCode, date.Year(), date.Month(), date.Day(),
+		)
+	} else {
+		// Use schedules API
+		path = fmt.Sprintf(
+			"/flex/schedules/rest/v1/json/flight/%s/%s/departing/%d/%d/%d",
+			airlineCode, flightCode, date.Year(), date.Month(), date.Day(),
+		)
 	}
 
-	airlineCode, flightCode, err := splitFlightNumber(flightNumber)
 	if err != nil {
 		return Details{}, err
 	}
-	path := fmt.Sprintf("/%s/%s/departing/%d/%d/%d", airlineCode, flightCode, date.Year(), date.Month(), date.Day())
 	resp, err := grequests.Get(baseURL+path, &grequests.RequestOptions{
 		Params: f.authParams,
 	})
@@ -70,24 +79,20 @@ func (f *FlightStats) GetAirportsForFlight(flightNumber string, date time.Time) 
 	if responseData.Error.ErrorMessage != "" {
 		return Details{}, fmt.Errorf("Error in FlightStats call: %w", errors.New(responseData.Error.ErrorMessage))
 	}
-
-	departureAirport, err := airports.GetFromIATA(responseData.ScheduledFlights[0].DepartureAirportFsCode)
-	if err != nil {
-		return Details{}, err
-	}
-	ArrivalAirport, err := airports.GetFromIATA(responseData.ScheduledFlights[0].ArrivalAirportFsCode)
-	if err != nil {
-		return Details{}, err
+	airports := responseData.Appendix.Airports
+	if len(airports) < 2 {
+		return Details{}, fmt.Errorf("Could not find flight number %s on %s", flightNumber, date.Format("2006-01-02"))
 	}
 
-	return Details{departureAirport.ICAO, ArrivalAirport.ICAO}, nil
+	return Details{airports[0].ICAO, airports[1].ICAO}, nil
 }
 
 type Response struct {
-	ScheduledFlights []struct {
-		DepartureAirportFsCode string `json:"departureAirportFsCode"`
-		ArrivalAirportFsCode   string `json:"arrivalAirportFsCode"`
-	} `json:"scheduledFlights"`
+	Appendix struct {
+		Airports []struct {
+			ICAO string `json:"icao"`
+		}
+	}
 	Error struct {
 		HTTPStatusCode int
 		ErrorMessage   string
