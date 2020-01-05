@@ -14,6 +14,13 @@ func TestSplitFlightNumberSuccess(t *testing.T) {
 	assert.Equal(t, "123", flight)
 }
 
+func TestSplitFlightNumberWhitespace(t *testing.T) {
+	airline, flight, err := splitFlightNumber("AC 123")
+	assert.NoError(t, err)
+	assert.Equal(t, "AC", airline)
+	assert.Equal(t, "123", flight)
+}
+
 func TestSplitFlightNumberFail(t *testing.T) {
 	airline, flight, err := splitFlightNumber("ACAC")
 	assert.Error(t, err)

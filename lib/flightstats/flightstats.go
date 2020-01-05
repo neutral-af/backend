@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/levigross/grequests"
@@ -16,7 +17,7 @@ var flightNumberRegex = regexp.MustCompile("([A-Z]+)([0-9]+)")
 
 func splitFlightNumber(flightNumber string) (airline string, flight string, err error) {
 	// The first element will be the whole string, successive elements are capture groups
-	reMatches := flightNumberRegex.FindStringSubmatch(flightNumber)
+	reMatches := flightNumberRegex.FindStringSubmatch(strings.ReplaceAll(flightNumber, " ", ""))
 
 	if len(reMatches) < 3 || reMatches[1] == "" || reMatches[2] == "" {
 		return "", "", fmt.Errorf("Unable to parse airline and number from flight number: %s", flightNumber)
