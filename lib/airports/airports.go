@@ -39,11 +39,11 @@ func init() {
 	airportsByICAO = make(map[string]Airport)
 	airportsByIATA = make(map[string]Airport)
 	for _, i := range openflights.Airports {
-		allAirports = append(allAirports, Airport(i))
-		airportsByICAO[i.ICAO] = Airport(i)
-		airportsByIATA[i.IATA] = Airport(i)
+		a := Airport(i)
+		allAirports = append(allAirports, a)
+		airportsByICAO[i.ICAO] = a
+		airportsByIATA[i.IATA] = a
 	}
-
 }
 
 func GetAll() Airports {
