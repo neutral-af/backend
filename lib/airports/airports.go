@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mmcloughlin/openflights"
+	"github.com/sahilm/fuzzy"
 
 	models "github.com/neutral-af/backend/lib/graphql-models"
 )
@@ -21,6 +22,10 @@ func (a Airports) Len() int {
 	return len(a)
 }
 
+func (a Airport) SearchableString() string {
+	return fmt.Sprintf("%s %s %s %s %s", a.City, a.IATA, a.Name, a.Country, a.ICAO)
+}
+
 func (a Airport) ToModel() models.Airport {
 	return models.Airport{
 		Name:    a.Name,
@@ -31,22 +36,41 @@ func (a Airport) ToModel() models.Airport {
 	}
 }
 
-var allAirports Airports
-var airportsByICAO map[string]Airport
-var airportsByIATA map[string]Airport
+var allAirports []Airport
+var allAirportsSearchableString []string
+var airportsByICAO = make(map[string]Airport)
+var airportsByIATA = make(map[string]Airport)
+var airportsBySearchableString = make(map[string]Airport)
 
 func init() {
-	airportsByICAO = make(map[string]Airport)
-	airportsByIATA = make(map[string]Airport)
+
 	for _, i := range openflights.Airports {
 		a := Airport(i)
 		allAirports = append(allAirports, a)
-		airportsByICAO[i.ICAO] = a
-		airportsByIATA[i.IATA] = a
+		allAirportsSearchableString = append(allAirportsSearchableString, a.SearchableString())
+		airportsByICAO[a.ICAO] = a
+		airportsByIATA[a.IATA] = a
+		airportsBySearchableString[a.SearchableString()] = a
 	}
+
 }
 
-func GetAll() Airports {
+func Search(query string) []Airport {
+	results := fuzzy.FindFrom(query, Airports(allAirports))
+
+	matches := []Airport{}
+	for _, r := range results {
+		if len(matches) > 10 {
+			break
+		}
+		a := allAirports[r.Index]
+		matches = append(matches, a)
+	}
+
+	return matches
+}
+
+func GetAll() []Airport {
 	return allAirports
 }
 

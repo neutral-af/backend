@@ -3,8 +3,6 @@ package resolvers
 import (
 	"context"
 
-	"github.com/sahilm/fuzzy"
-
 	"github.com/neutral-af/backend/lib/airports"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 )
@@ -12,19 +10,15 @@ import (
 type getAirportResolver struct{ *Resolver }
 
 func (r *getAirportResolver) Search(ctx context.Context, get *models.GetAirport, query string) ([]*models.Airport, error) {
-	airports := airports.GetAll()
-	results := fuzzy.FindFrom(query, airports)
+	matches := airports.Search(query)
+	var matchesModels []*models.Airport
 
-	matches := []*models.Airport{}
-	for _, r := range results {
-		if len(matches) > 10 {
-			break
-		}
-		a := airports[r.Index].ToModel()
-		matches = append(matches, &a)
+	for _, m := range matches {
+		model := m.ToModel()
+		matchesModels = append(matchesModels, &model)
 	}
 
-	return matches, nil
+	return matchesModels, nil
 }
 
 func (r *getAirportResolver) FromIcao(ctx context.Context, get *models.GetAirport, code string) (*models.Airport, error) {
