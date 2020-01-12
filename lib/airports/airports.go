@@ -15,7 +15,7 @@ type Airports []Airport
 
 // Implement the searchable interface for the fuzzy-searcher
 func (a Airports) String(i int) string {
-	return fmt.Sprintf("%s %s %s %s %s", a[i].City, a[i].IATA, a[i].Name, a[i].Country, a[i].ICAO)
+	return a[i].SearchableString()
 }
 
 func (a Airports) Len() int {
@@ -23,7 +23,7 @@ func (a Airports) Len() int {
 }
 
 func (a Airport) SearchableString() string {
-	return fmt.Sprintf("%s %s %s %s %s", a.City, a.IATA, a.Name, a.Country, a.ICAO)
+	return fmt.Sprintf("%s %s %s %s %s", a.Name, a.IATA, a.City, a.Country, a.ICAO)
 }
 
 func (a Airport) ToModel() models.Airport {
