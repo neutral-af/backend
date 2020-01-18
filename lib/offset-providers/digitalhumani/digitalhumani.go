@@ -89,9 +89,12 @@ func (d *DigitalHumani) CreateCarbonEstimate(carbon int) (*models.Estimate, erro
 	}, nil
 }
 
+func (d *DigitalHumani) RetrieveEstimate(estimateID string) (*models.Estimate, error) {
+	return nil, fmt.Errorf("Provider DigitalHumani does not implement retrieval")
+}
+
 func (d *DigitalHumani) Purchase(estimateID string) (*models.Purchase, error) {
 	body, err := utils.CreateBodyFromMap(map[string]interface{}{
-		// POST /tree {"enterpriseId":"11111111","projectId":"93333333","user":"email@test.com,","treeCount":2}
 		"enterpriseId": d.enterpriseID,
 		"projectId":    "93333333",
 		"user":         d.user,
@@ -112,17 +115,7 @@ func (d *DigitalHumani) Purchase(estimateID string) (*models.Purchase, error) {
 
 	purchase := &models.Purchase{}
 	purchase.Carbon = tree_carbon.CarbonKGForTrees(responseData.TreeCount)
-	purchase.ID = responseData.UUID
+	purchase.ID = &responseData.UUID
 
 	return purchase, nil
 }
-
-// func (c *DigitalHumani) Purchase(estimateID string) (Response, error) {
-// 	path := "/purchases"
-
-// 	data := map[string]interface{}{
-// 		"estimate_slug": estimateID,
-// 	}
-
-// 	return c.postWithBody(path, data)
-// }
