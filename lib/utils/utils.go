@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func CreateBodyFromMap(data map[string]interface{}) (io.Reader, error) {
+func MapToJSON(data map[string]interface{}) (io.Reader, error) {
 	b, err := json.Marshal(data)
 	if err != nil {
 		return bytes.NewReader([]byte{}), err

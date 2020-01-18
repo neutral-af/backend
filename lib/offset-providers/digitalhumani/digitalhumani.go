@@ -94,7 +94,7 @@ func (d *DigitalHumani) RetrieveEstimate(estimateID string) (*models.Estimate, e
 }
 
 func (d *DigitalHumani) Purchase(estimateID string) (*models.Purchase, error) {
-	body, err := utils.CreateBodyFromMap(map[string]interface{}{
+	body, err := utils.MapToJSON(map[string]interface{}{
 		"enterpriseId": d.enterpriseID,
 		"projectId":    "93333333",
 		"user":         d.user,

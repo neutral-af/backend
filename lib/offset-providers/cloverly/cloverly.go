@@ -1,15 +1,14 @@
 package cloverly
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math"
 
 	"github.com/levigross/grequests"
 	"github.com/neutral-af/backend/lib/config"
 	models "github.com/neutral-af/backend/lib/graphql-models"
+	"github.com/neutral-af/backend/lib/utils"
 	"github.com/pkg/errors"
 )
 
@@ -53,7 +52,7 @@ func (c *Cloverly) get(path string) (Response, error) {
 }
 
 func (c *Cloverly) postWithBody(path string, body map[string]interface{}) (Response, error) {
-	data, err := createBodyFromMap(body)
+	data, err := utils.MapToJSON(body)
 	if err != nil {
 		return Response{}, err
 	}
@@ -173,15 +172,6 @@ type Response struct {
 		TechnicalDetails string `json:"technical_details"`
 		Deprecated       string
 	} `json:"renewable_energy_certificate"`
-}
-
-func createBodyFromMap(data map[string]interface{}) (io.Reader, error) {
-	b, err := json.Marshal(data)
-	if err != nil {
-		return bytes.NewReader([]byte{}), err
-	}
-
-	return bytes.NewReader(b), nil
 }
 
 func responseToEstimate(response Response) (*models.Estimate, error) {
