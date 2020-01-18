@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"io"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
+	"io"
 )
 
 func CreateBodyFromMap(data map[string]interface{}) (io.Reader, error) {
