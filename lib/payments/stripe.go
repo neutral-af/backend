@@ -41,7 +41,7 @@ func generatePaymentResponse(intent *stripe.PaymentIntent, saveCard *bool) (*mod
 		}
 		c, err := customer.New(customerParams)
 		if err != nil {
-			return &paymentResponse, fmt.Errorf("Unable to create customer and save paymentMethod: %s", err)
+			return &paymentResponse, fmt.Errorf("Unable to create customer and save paymentMethod: %w", err)
 		}
 		paymentResponse.CustomerID = &c.ID
 	}

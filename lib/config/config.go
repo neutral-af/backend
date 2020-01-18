@@ -23,6 +23,8 @@ type config struct {
 	Environment               Environment
 	CloverlyAPIKey            string `mapstructure:"CLOVERLY_API_KEY"`
 	DigitalHumaniEnterpriseID string `mapstructure:"DIGITALHUMANI_ENTERPRISE_ID"`
+	FlightStatsAppID          string `mapstructure:"FLIGHTSTATS_APP_ID"`
+	FlightStatsAppKey         string `mapstructure:"FLIGHTSTATS_APP_KEY"`
 	HoneycombAPIKey           string `mapstructure:"HONEYCOMB_API_KEY"`
 	StripeSecretKey           string `mapstructure:"STRIPE_SECRET_KEY"`
 }
@@ -60,6 +62,8 @@ func New() config {
 	viper.BindEnv("DIGITALHUMANI_ENTERPRISE_ID")
 	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.BindEnv("STRIPE_SECRET_KEY")
+	viper.BindEnv("FLIGHTSTATS_APP_ID")
+	viper.BindEnv("FLIGHTSTATS_APP_KEY")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {

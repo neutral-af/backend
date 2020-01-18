@@ -9,6 +9,10 @@
         { "src": "/.*", "status": 404 }
     ],
     "env": {
+        "STAGING_FLIGHTSTATS_APP_ID": "@flightstats_app_id",
+        "STAGING_FLIGHTSTATS_APP_KEY": "@flightstats_app_key",
+        "PROD_FLIGHTSTATS_APP_ID": "@flightstats_app_id",
+        "PROD_FLIGHTSTATS_APP_KEY": "@flightstats_app_key",
         "STAGING_CLOVERLY_API_KEY": "@staging_cloverly_api_key",
         "PROD_CLOVERLY_API_KEY": "@prod_cloverly_api_key",
         "STAGING_HONEYCOMB_API_KEY": "@honeycomb_api_key",

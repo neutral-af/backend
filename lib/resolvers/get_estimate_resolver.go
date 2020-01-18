@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"math"
+	"time"
 
 	"github.com/honeycombio/beeline-go"
 	"github.com/neutral-af/backend/lib/distance"
 	"github.com/neutral-af/backend/lib/emissions"
+	"github.com/neutral-af/backend/lib/flightstats"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	providers "github.com/neutral-af/backend/lib/offset-providers"
 	"github.com/neutral-af/backend/lib/offset-providers/cloverly"
@@ -16,10 +18,12 @@ import (
 
 var cloverlyAPI cloverly.Cloverly
 var digitalHumaniAPI digitalhumani.DigitalHumani
+var flightStatsAPI flightstats.FlightStats
 
 func init() {
 	cloverlyAPI = cloverly.New()
 	digitalHumaniAPI = digitalhumani.New()
+	flightStatsAPI = flightstats.New()
 }
 
 type getEstimateResolver struct{ *Resolver }
@@ -32,23 +36,37 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	accumCarbon := 0.0
 
 	for _, f := range flights {
+		var departure, arrival string
 		if f.Departure != nil && *f.Departure != "" && f.Arrival != nil && *f.Arrival != "" {
 			if *f.Departure == *f.Arrival {
 				return nil, errors.New("Departure and Arrival cannot be the same")
 			}
-			distance, err := distance.TwoAirports(*f.Departure, *f.Arrival)
+			departure = *f.Departure
+			arrival = *f.Arrival
+		} else if f.FlightNumber != nil && *f.FlightNumber != "" && f.Date != nil && *f.Date != "" {
+			date, err := time.Parse(time.RFC3339, *f.Date)
 			if err != nil {
 				return nil, err
 			}
-			accumDistance += distance
 
-			emissions := emissions.FlightCarbon(distance)
-			accumCarbon += emissions
-		} else if f.FlightNumber != nil && *f.FlightNumber != "" && f.Date != nil && *f.Date != "" {
-			return nil, errors.New("Calculating from flight number not yet implemented")
+			details, err := flightStatsAPI.GetAirportsForFlight(*f.FlightNumber, date)
+			if err != nil {
+				return nil, err
+			}
+			departure = details.Departure
+			arrival = details.Arrival
 		} else {
 			return nil, errors.New("Invalid flight input: either (departure,arrival) or (flightNumber,date) must be provided")
 		}
+
+		distance, err := distance.TwoAirports(departure, arrival)
+		if err != nil {
+			return nil, err
+		}
+		accumDistance += distance
+
+		emissions := emissions.FlightCarbon(distance)
+		accumCarbon += emissions
 	}
 
 	totalDistance := int(math.Round(accumDistance))
