@@ -9,8 +9,6 @@ test:
 dev:
 	go run cmd/dev/main.go
 
-# `make deps` will fetch go deps, clean the modfile, and
-# rebuild the generated classes based on the GraphQL schema
 mod:
 	go get -v all
 	go mod tidy
