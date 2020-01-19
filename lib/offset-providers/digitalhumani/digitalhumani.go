@@ -69,13 +69,19 @@ func (d *DigitalHumani) GetAllProjects() ([]Project, error) {
 // Estimate creates a DigitalHumani estimate for the given volume of carbon
 func (d *DigitalHumani) CreateCarbonEstimate(carbon int) (*models.Estimate, error) {
 	trees := tree_carbon.TreesForCarbonKG(carbon)
+	var treeStr string
+	if trees == 1 {
+		treeStr = "tree"
+	} else {
+		treeStr = "trees"
+	}
 
 	return &models.Estimate{
 		Carbon: &carbon,
 		Price: &models.Price{
 			Breakdown: []*models.PriceElement{
 				&models.PriceElement{
-					Name:     fmt.Sprintf("Your carbon offsets: %d trees!", trees),
+					Name:     fmt.Sprintf("Your carbon offsets (%d %s)", trees, treeStr),
 					Cents:    trees * centsPerTree,
 					Currency: models.CurrencyUsd,
 				},

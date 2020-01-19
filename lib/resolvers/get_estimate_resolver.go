@@ -26,6 +26,20 @@ func init() {
 	flightStatsAPI = flightstats.New()
 }
 
+func getProviderAPI(p models.Provider) (providers.Provider, error) {
+	var provider providers.Provider
+	switch p {
+	case models.ProviderCloverly:
+		provider = &cloverlyAPI
+	case models.ProviderDigitalHumani:
+		provider = &digitalHumaniAPI
+	default:
+		return nil, errors.New("Provider unknown or not set")
+	}
+
+	return provider, nil
+}
+
 type getEstimateResolver struct{ *Resolver }
 
 func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error) {
@@ -75,14 +89,9 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "provider", *options.Provider)
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
-	var provider providers.Provider
-	switch *options.Provider {
-	case models.ProviderCloverly:
-		provider = &cloverlyAPI
-	case models.ProviderDigitalHumani:
-		provider = &digitalHumaniAPI
-	default:
-		return nil, errors.New("Provider unknown or not set")
+	provider, err := getProviderAPI(*options.Provider)
+	if err != nil {
+		return nil, err
 	}
 
 	estimate, err := provider.CreateCarbonEstimate(totalCarbon)
