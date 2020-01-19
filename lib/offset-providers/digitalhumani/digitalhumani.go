@@ -99,12 +99,14 @@ func (d *DigitalHumani) RetrieveEstimate(estimateID string) (*models.Estimate, e
 	return nil, fmt.Errorf("Provider DigitalHumani does not implement retrieval")
 }
 
-func (d *DigitalHumani) Purchase(estimateID string) (*models.Purchase, error) {
+func (d *DigitalHumani) Purchase(estimate models.EstimateIn) (*models.Purchase, error) {
+	trees := tree_carbon.TreesForCarbonKG(*estimate.Carbon)
+
 	body, err := utils.MapToJSON(map[string]interface{}{
 		"enterpriseId": d.enterpriseID,
 		"projectId":    "93333333",
 		"user":         d.user,
-		"treeCount":    1,
+		"treeCount":    trees,
 	})
 	resp, err := grequests.Post(d.baseURL+"/dev/tree", &grequests.RequestOptions{
 		RequestBody: body,

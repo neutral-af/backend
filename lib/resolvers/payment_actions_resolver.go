@@ -48,7 +48,7 @@ func purchaseIfReady(ctx context.Context, response *models.PaymentResponse, esti
 		return nil, err
 	}
 
-	purchase, err := provider.Purchase(*estimate.ID)
+	purchase, err := provider.Purchase(estimate)
 	if err != nil {
 		// Risky error here! Money already taken from stripe, offset not yet confirmed
 		return nil, err

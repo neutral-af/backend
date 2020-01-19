@@ -111,11 +111,11 @@ func (c *Cloverly) RetrieveEstimate(slug string) (*models.Estimate, error) {
 	return responseToEstimate(response)
 }
 
-func (c *Cloverly) Purchase(estimateID string) (*models.Purchase, error) {
+func (c *Cloverly) Purchase(estimate models.EstimateIn) (*models.Purchase, error) {
 	path := "/purchases"
 
 	data := map[string]interface{}{
-		"estimate_slug": estimateID,
+		"estimate_slug": estimate.ID,
 	}
 
 	response, err := c.postWithBody(path, data)

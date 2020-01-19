@@ -9,5 +9,5 @@ import (
 type Provider interface {
 	CreateCarbonEstimate(carbon int) (*models.Estimate, error)
 	RetrieveEstimate(slug string) (*models.Estimate, error)
-	Purchase(estimateID string) (*models.Purchase, error)
+	Purchase(estimate models.EstimateIn) (*models.Purchase, error)
 }
