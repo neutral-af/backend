@@ -117,7 +117,7 @@ func TestPurchaseSuccess(t *testing.T) {
 
 	gock.New(mockURL).
 		Post("/tree").
-		Reply(201).
+		Reply(200).
 		JSON(map[string]interface{}{
 			"uuid":      "1234",
 			"projectId": "test_project",
