@@ -102,3 +102,11 @@ Purchase an offset using an estimate ID and provider:
             }
         }
     }
+
+## Manual Deploy
+
+Zeit doesn't yet provide a sufficient "staging environment", that deploys for master but uses non-production credentials. The frontend system relies on a stable non-production target for its preview environments, so this project can be deployed in a manual non-production mode. To release this, simply run:
+
+    now --env NOW_GITHUB_COMMIT_REF=local
+
+This will make a non-production "staging" deploy, and print its URL (eg. https://backend-jasongwartz.neutral-af.now.sh). This URL can then be configured for the frontend application.
