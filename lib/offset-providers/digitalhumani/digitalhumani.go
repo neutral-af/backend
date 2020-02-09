@@ -8,7 +8,6 @@ import (
 	"github.com/neutral-af/backend/lib/config"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	tree_carbon "github.com/neutral-af/backend/lib/tree-carbon"
-	"github.com/neutral-af/backend/lib/utils"
 )
 
 const centsPerTree = 100
@@ -41,18 +40,26 @@ type Tree struct {
 	EnterpriseID string
 	ProjectID    string
 	User         string
+	Message      string
 }
 
 func New() DigitalHumani {
+	var baseURL string
+	if config.C.Environment == config.EnvironmentProd {
+		baseURL = "https://api.digitalhumani.com"
+	} else {
+		baseURL = "https://api-dev.digitalhumani.com"
+	}
+
 	return DigitalHumani{
 		enterpriseID: config.C.DigitalHumaniEnterpriseID,
-		baseURL:      "https://3ib0d53ao8.execute-api.ca-central-1.amazonaws.com",
+		baseURL:      baseURL,
 		user:         "invoices@neutral.af",
 	}
 }
 
 func (d *DigitalHumani) GetAllProjects() ([]Project, error) {
-	resp, err := grequests.Get(d.baseURL+"/dev/project", &grequests.RequestOptions{})
+	resp, err := grequests.Get(d.baseURL+"/project", &grequests.RequestOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -102,14 +109,13 @@ func (d *DigitalHumani) RetrieveEstimate(estimateID string) (*models.Estimate, e
 func (d *DigitalHumani) Purchase(estimate models.EstimateIn) (*models.Purchase, error) {
 	trees := tree_carbon.TreesForCarbonKG(*estimate.Carbon)
 
-	body, err := utils.MapToJSON(map[string]interface{}{
-		"enterpriseId": d.enterpriseID,
-		"projectId":    "93333333",
-		"user":         d.user,
-		"treeCount":    trees,
-	})
-	resp, err := grequests.Post(d.baseURL+"/dev/tree", &grequests.RequestOptions{
-		RequestBody: body,
+	resp, err := grequests.Post(d.baseURL+"/tree", &grequests.RequestOptions{
+		Params: map[string]string{
+			"enterpriseId": d.enterpriseID,
+			"projectId":    "93333333",
+			"user":         d.user,
+			"treeCount":    string(trees),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -119,6 +125,10 @@ func (d *DigitalHumani) Purchase(estimate models.EstimateIn) (*models.Purchase, 
 	err = resp.JSON(&responseData)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Error in DigitalHumani call (status %d): %s", resp.StatusCode, responseData.Message)
 	}
 
 	purchase := &models.Purchase{}
