@@ -8,6 +8,7 @@ import (
 	"github.com/neutral-af/backend/lib/config"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	tree_carbon "github.com/neutral-af/backend/lib/tree-carbon"
+	"github.com/neutral-af/backend/lib/utils"
 )
 
 const centsPerTree = 100
@@ -109,13 +110,17 @@ func (d *DigitalHumani) RetrieveEstimate(estimateID string) (*models.Estimate, e
 func (d *DigitalHumani) Purchase(estimate models.EstimateIn) (*models.Purchase, error) {
 	trees := tree_carbon.TreesForCarbonKG(*estimate.Carbon)
 
+	body, err := utils.MapToJSON(map[string]interface{}{
+		"enterpriseId": d.enterpriseID,
+		"projectId":    "93333333",
+		"user":         d.user,
+		"treeCount":    trees,
+	})
 	resp, err := grequests.Post(d.baseURL+"/tree", &grequests.RequestOptions{
-		Params: map[string]string{
-			"enterpriseId": d.enterpriseID,
-			"projectId":    "93333333",
-			"user":         d.user,
-			"treeCount":    string(trees),
+		Headers: map[string]string{
+			"Content-Type": "application/json",
 		},
+		RequestBody: body,
 	})
 	if err != nil {
 		return nil, err
