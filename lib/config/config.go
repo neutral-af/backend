@@ -23,6 +23,7 @@ type config struct {
 	Environment               Environment
 	CloverlyAPIKey            string `mapstructure:"CLOVERLY_API_KEY"`
 	DigitalHumaniEnterpriseID string `mapstructure:"DIGITALHUMANI_ENTERPRISE_ID"`
+	DigitalHumaniAPIKey       string `mapstructure:"DIGITALHUMANI_API_KEY"`
 	FlightStatsAppID          string `mapstructure:"FLIGHTSTATS_APP_ID"`
 	FlightStatsAppKey         string `mapstructure:"FLIGHTSTATS_APP_KEY"`
 	HoneycombAPIKey           string `mapstructure:"HONEYCOMB_API_KEY"`

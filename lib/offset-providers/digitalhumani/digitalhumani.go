@@ -110,6 +110,13 @@ func (d *DigitalHumani) RetrieveEstimate(estimateID string) (*models.Estimate, e
 func (d *DigitalHumani) Purchase(estimate models.EstimateIn) (*models.Purchase, error) {
 	trees := tree_carbon.TreesForCarbonKG(*estimate.Carbon)
 
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+	if config.C.Environment == config.EnvironmentProd {
+		headers["X-Api-Key"] = config.C.DigitalHumaniAPIKey
+	}
+
 	body, err := utils.MapToJSON(map[string]interface{}{
 		"enterpriseId": d.enterpriseID,
 		"projectId":    "93333333",
@@ -117,9 +124,7 @@ func (d *DigitalHumani) Purchase(estimate models.EstimateIn) (*models.Purchase, 
 		"treeCount":    trees,
 	})
 	resp, err := grequests.Post(d.baseURL+"/tree", &grequests.RequestOptions{
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
+		Headers:     headers,
 		RequestBody: body,
 	})
 	if err != nil {
