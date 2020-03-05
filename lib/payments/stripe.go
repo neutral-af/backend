@@ -35,7 +35,7 @@ func generatePaymentResponse(intent *stripe.PaymentIntent, saveCard *bool) (*mod
 		Success: stripe.Bool(true),
 	}
 
-	if *saveCard {
+	if saveCard != nil && *saveCard {
 		customerParams := &stripe.CustomerParams{
 			PaymentMethod: &intent.PaymentMethod.ID,
 		}

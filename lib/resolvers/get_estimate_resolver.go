@@ -6,22 +6,38 @@ import (
 	"math"
 	"time"
 
+	"github.com/honeycombio/beeline-go"
 	"github.com/neutral-af/backend/lib/distance"
 	"github.com/neutral-af/backend/lib/emissions"
 	"github.com/neutral-af/backend/lib/flightstats"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	providers "github.com/neutral-af/backend/lib/offset-providers"
 	"github.com/neutral-af/backend/lib/offset-providers/cloverly"
-
-	"github.com/honeycombio/beeline-go"
+	"github.com/neutral-af/backend/lib/offset-providers/digitalhumani"
 )
 
 var cloverlyAPI cloverly.Cloverly
+var digitalHumaniAPI digitalhumani.DigitalHumani
 var flightStatsAPI flightstats.FlightStats
 
 func init() {
 	cloverlyAPI = cloverly.New()
+	digitalHumaniAPI = digitalhumani.New()
 	flightStatsAPI = flightstats.New()
+}
+
+func getProviderAPI(p models.Provider) (providers.Provider, error) {
+	var provider providers.Provider
+	switch p {
+	case models.ProviderCloverly:
+		provider = &cloverlyAPI
+	case models.ProviderDigitalHumani:
+		provider = &digitalHumaniAPI
+	default:
+		return nil, errors.New("Provider unknown or not set")
+	}
+
+	return provider, nil
 }
 
 type getEstimateResolver struct{ *Resolver }
@@ -73,13 +89,11 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "provider", *options.Provider)
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
-	var provider providers.Provider
-	if *options.Provider == models.ProviderCloverly {
-		provider = &cloverlyAPI
-	} else {
-		return nil, errors.New("Provider unknown or not set")
-
+	provider, err := getProviderAPI(*options.Provider)
+	if err != nil {
+		return nil, err
 	}
+
 	estimate, err := provider.CreateCarbonEstimate(totalCarbon)
 	if err != nil {
 		return nil, err

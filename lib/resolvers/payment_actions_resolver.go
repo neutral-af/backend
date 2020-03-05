@@ -2,11 +2,9 @@ package resolvers
 
 import (
 	"context"
-	"errors"
 
 	"github.com/honeycombio/beeline-go"
 	models "github.com/neutral-af/backend/lib/graphql-models"
-	providers "github.com/neutral-af/backend/lib/offset-providers"
 	"github.com/neutral-af/backend/lib/payments"
 )
 
@@ -45,14 +43,12 @@ func purchaseIfReady(ctx context.Context, response *models.PaymentResponse, esti
 		return response, nil
 	}
 
-	var provider providers.Provider
-	if *estimate.Options.Provider == models.ProviderCloverly {
-		provider = &cloverlyAPI
-	} else {
-		return nil, errors.New("Provider unknown or not set")
+	provider, err := getProviderAPI(*estimate.Options.Provider)
+	if err != nil {
+		return nil, err
 	}
 
-	purchase, err := provider.Purchase(*estimate.ID)
+	purchase, err := provider.Purchase(estimate)
 	if err != nil {
 		// Risky error here! Money already taken from stripe, offset not yet confirmed
 		return nil, err

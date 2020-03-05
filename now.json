@@ -18,7 +18,10 @@
         "STAGING_HONEYCOMB_API_KEY": "@honeycomb_api_key",
         "PROD_HONEYCOMB_API_KEY": "@honeycomb_api_key",
         "STAGING_STRIPE_SECRET_KEY": "@staging_stripe_secret_key",
-        "PROD_STRIPE_SECRET_KEY": "@prod_stripe_secret_key"
+        "PROD_STRIPE_SECRET_KEY": "@prod_stripe_secret_key",
+        "STAGING_DIGITALHUMANI_ENTERPRISE_ID": "@staging_digitalhumani_enterprise_id",
+        "PROD_DIGITALHUMANI_ENTERPRISE_ID": "@prod_digitalhumani_enterprise_id",
+        "PROD_DIGITALHUMANI_API_KEY": "@prod_digitalhumani_api_key"
     },
     "regions": ["bru"],
     "public": false

@@ -20,12 +20,14 @@ const (
 )
 
 type config struct {
-	Environment       Environment
-	CloverlyAPIKey    string `mapstructure:"CLOVERLY_API_KEY"`
-	FlightStatsAppID  string `mapstructure:"FLIGHTSTATS_APP_ID"`
-	FlightStatsAppKey string `mapstructure:"FLIGHTSTATS_APP_KEY"`
-	HoneycombAPIKey   string `mapstructure:"HONEYCOMB_API_KEY"`
-	StripeSecretKey   string `mapstructure:"STRIPE_SECRET_KEY"`
+	Environment               Environment
+	CloverlyAPIKey            string `mapstructure:"CLOVERLY_API_KEY"`
+	DigitalHumaniEnterpriseID string `mapstructure:"DIGITALHUMANI_ENTERPRISE_ID"`
+	DigitalHumaniAPIKey       string `mapstructure:"DIGITALHUMANI_API_KEY"`
+	FlightStatsAppID          string `mapstructure:"FLIGHTSTATS_APP_ID"`
+	FlightStatsAppKey         string `mapstructure:"FLIGHTSTATS_APP_KEY"`
+	HoneycombAPIKey           string `mapstructure:"HONEYCOMB_API_KEY"`
+	StripeSecretKey           string `mapstructure:"STRIPE_SECRET_KEY"`
 }
 
 // C is the object containing config values
@@ -58,6 +60,7 @@ func New() config {
 	viper.SetEnvPrefix(c.Environment.ToString())
 
 	viper.BindEnv("CLOVERLY_API_KEY")
+	viper.BindEnv("DIGITALHUMANI_ENTERPRISE_ID")
 	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.BindEnv("STRIPE_SECRET_KEY")
 	viper.BindEnv("FLIGHTSTATS_APP_ID")
