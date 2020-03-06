@@ -84,7 +84,7 @@ type ComplexityRoot struct {
 	}
 
 	PaymentActions struct {
-		Checkout func(childComplexity int, estimate models.EstimateIn, paymentMethod string, options *models.PaymentOptions) int
+		Checkout func(childComplexity int, estimate models.EstimateIn, paymentMethod string, currency models.Currency, options *models.PaymentOptions) int
 		Confirm  func(childComplexity int, estimate models.EstimateIn, paymentIntent string, options *models.PaymentOptions) int
 	}
 
@@ -136,7 +136,7 @@ type MutationResolver interface {
 	Payment(ctx context.Context) (*models.PaymentActions, error)
 }
 type PaymentActionsResolver interface {
-	Checkout(ctx context.Context, obj *models.PaymentActions, estimate models.EstimateIn, paymentMethod string, options *models.PaymentOptions) (*models.PaymentResponse, error)
+	Checkout(ctx context.Context, obj *models.PaymentActions, estimate models.EstimateIn, paymentMethod string, currency models.Currency, options *models.PaymentOptions) (*models.PaymentResponse, error)
 	Confirm(ctx context.Context, obj *models.PaymentActions, estimate models.EstimateIn, paymentIntent string, options *models.PaymentOptions) (*models.PaymentResponse, error)
 }
 type QueryResolver interface {
@@ -321,7 +321,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.PaymentActions.Checkout(childComplexity, args["estimate"].(models.EstimateIn), args["paymentMethod"].(string), args["options"].(*models.PaymentOptions)), true
+		return e.complexity.PaymentActions.Checkout(childComplexity, args["estimate"].(models.EstimateIn), args["paymentMethod"].(string), args["currency"].(models.Currency), args["options"].(*models.PaymentOptions)), true
 
 	case "PaymentActions.confirm":
 		if e.complexity.PaymentActions.Confirm == nil {
@@ -562,7 +562,7 @@ input EstimateOptions {
 }
 `},
 	&ast.Source{Name: "schema/payment-purchase.graphql", Input: `type PaymentActions {
-    checkout(estimate: EstimateIn!, paymentMethod: String!, options: PaymentOptions = {}): PaymentResponse
+    checkout(estimate: EstimateIn!, paymentMethod: String!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
     confirm(estimate: EstimateIn!, paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
 }
 
@@ -577,10 +577,6 @@ type Purchase {
     carbon: Int!
     details: String
 }
-
-# type Addon {
-
-# }
 
 input PaymentOptions {
     saveCard: Boolean
@@ -739,14 +735,22 @@ func (ec *executionContext) field_PaymentActions_checkout_args(ctx context.Conte
 		}
 	}
 	args["paymentMethod"] = arg1
-	var arg2 *models.PaymentOptions
-	if tmp, ok := rawArgs["options"]; ok {
-		arg2, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
+	var arg2 models.Currency
+	if tmp, ok := rawArgs["currency"]; ok {
+		arg2, err = ec.unmarshalNCurrency2githubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐCurrency(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["options"] = arg2
+	args["currency"] = arg2
+	var arg3 *models.PaymentOptions
+	if tmp, ok := rawArgs["options"]; ok {
+		arg3, err = ec.unmarshalOPaymentOptions2ᚖgithubᚗcomᚋneutralᚑafᚋbackendᚋlibᚋgraphqlᚑmodelsᚐPaymentOptions(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["options"] = arg3
 	return args, nil
 }
 
@@ -1527,7 +1531,7 @@ func (ec *executionContext) _PaymentActions_checkout(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PaymentActions().Checkout(rctx, obj, args["estimate"].(models.EstimateIn), args["paymentMethod"].(string), args["options"].(*models.PaymentOptions))
+		return ec.resolvers.PaymentActions().Checkout(rctx, obj, args["estimate"].(models.EstimateIn), args["paymentMethod"].(string), args["currency"].(models.Currency), args["options"].(*models.PaymentOptions))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

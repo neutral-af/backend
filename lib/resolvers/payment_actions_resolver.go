@@ -11,7 +11,7 @@ import (
 
 type paymentActionsResolver struct{ *Resolver }
 
-func (r *paymentActionsResolver) Checkout(ctx context.Context, pa *models.PaymentActions, estimateIn models.EstimateIn, paymentMethod string, opts *models.PaymentOptions) (*models.PaymentResponse, error) {
+func (r *paymentActionsResolver) Checkout(ctx context.Context, pa *models.PaymentActions, estimateIn models.EstimateIn, paymentMethod string, currency models.Currency, opts *models.PaymentOptions) (*models.PaymentResponse, error) {
 	ctx, span := beeline.StartSpan(ctx, "checkout")
 	defer span.Send()
 
@@ -25,7 +25,7 @@ func (r *paymentActionsResolver) Checkout(ctx context.Context, pa *models.Paymen
 		return nil, err
 	}
 
-	response, err := payments.Checkout(paymentMethod, estimate.Price.Cents, estimate.Price.Currency, opts)
+	response, err := payments.Checkout(paymentMethod, estimate.Price.Cents, currency, opts)
 	if err != nil {
 		return nil, err
 	}
