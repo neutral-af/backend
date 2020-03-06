@@ -134,18 +134,18 @@ func TestExchangeUpdateError(t *testing.T) {
 	assert.True(t, gock.IsDone())
 }
 
-func TestCovertFromUSDNoop(t *testing.T) {
+func TestCovertNoop(t *testing.T) {
 	defer gock.Off()
 	gock.New("*").Reply(500).SetError(errors.New("shouldn't have made this request!"))
 
-	cents, err := ConvertFromUSD(100, "USD")
+	cents, err := Convert(100, "USD", "USD")
 	assert.NoError(t, err)
 	assert.NotZero(t, cents)
 
 	assert.True(t, gock.IsPending())
 }
 
-func TestConvertFromUSD(t *testing.T) {
+func TestConvert(t *testing.T) {
 	defer gock.Off()
 	gock.New("*").Reply(500).SetError(errors.New("shouldn't have made this request!"))
 
@@ -160,7 +160,7 @@ func TestConvertFromUSD(t *testing.T) {
 		},
 	}
 
-	cents, err := ConvertFromUSD(200, "EUR")
+	cents, err := Convert(200, "USD", "EUR")
 	assert.NoError(t, err)
 	assert.NotZero(t, cents)
 	assert.Equal(t, 260, cents)

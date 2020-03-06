@@ -10,14 +10,8 @@ import (
 
 type estimateResolver struct{ *Resolver }
 
-func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputCurrency *models.Currency) (*models.Price, error) {
-	ctx, span := beeline.StartSpan(ctx, "calculatePrice")
-	defer span.Send()
-
-	userCurrency := *inputCurrency
-	beeline.AddField(ctx, "currency", userCurrency)
-
-	priceElements := e.Price.Breakdown
+func processTotalPrice(p models.Price, userCurrency models.Currency) (models.Price, error) {
+	priceElements := p.Breakdown
 	priceElements = append(priceElements, &models.PriceElement{
 		Name:     "Payment processing fee",
 		Cents:    30,
@@ -28,7 +22,7 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 	for _, f := range priceElements {
 		cents, err := currency.Convert(f.Cents, f.Currency, userCurrency)
 		if err != nil {
-			return nil, err
+			return models.Price{}, err
 		}
 		f.Cents = cents
 		f.Currency = userCurrency
@@ -43,9 +37,21 @@ func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputC
 		Currency: userCurrency,
 	})
 
-	e.Price.Breakdown = priceElements
-	e.Price.Cents = totalCents
-	e.Price.Currency = userCurrency
+	p.Breakdown = priceElements
+	p.Cents = totalCents
+	p.Currency = userCurrency
 
-	return e.Price, nil
+	return p, nil
+}
+
+func (r *estimateResolver) Price(ctx context.Context, e *models.Estimate, inputCurrency *models.Currency) (*models.Price, error) {
+	ctx, span := beeline.StartSpan(ctx, "calculate price")
+	defer span.Send()
+
+	price, err := processTotalPrice(*e.Price, *inputCurrency)
+	if err != nil {
+		return nil, err
+	}
+
+	return &price, nil
 }

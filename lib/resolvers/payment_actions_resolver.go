@@ -25,6 +25,13 @@ func (r *paymentActionsResolver) Checkout(ctx context.Context, pa *models.Paymen
 		return nil, err
 	}
 
+	price, err := processTotalPrice(*estimate.Price, currency)
+	if err != nil {
+		return nil, err
+	}
+
+	estimate.Price = &price
+
 	response, err := payments.Checkout(paymentMethod, estimate.Price.Cents, currency, opts)
 	if err != nil {
 		return nil, err

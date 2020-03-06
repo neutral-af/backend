@@ -23,7 +23,7 @@ func init() {
 type getEstimateResolver struct{ *Resolver }
 
 func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEstimate, flights []*models.Flight, options *models.EstimateOptions) (*models.Estimate, error) {
-	ctx, span := beeline.StartSpan(ctx, "fromFlights")
+	ctx, span := beeline.StartSpan(ctx, "get estimate from flights")
 	defer span.Send()
 
 	accumDistance := 0.0
@@ -74,10 +74,12 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 		return nil, err
 	}
 
+	ctx, providerSpan := beeline.StartSpan(ctx, "call estimate provider")
 	estimate, err := provider.CreateCarbonEstimate(totalCarbon)
 	if err != nil {
 		return nil, err
 	}
+	providerSpan.Send()
 
 	beeline.AddField(ctx, "estimateID", estimate.ID)
 
@@ -88,6 +90,9 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 }
 
 func (r *getEstimateResolver) FromID(ctx context.Context, get *models.GetEstimate, id *string, provider *models.Provider) (*models.Estimate, error) {
+	ctx, span := beeline.StartSpan(ctx, "retrieve estimate from ID")
+	defer span.Send()
+
 	p, err := providers.GetProviderAPI(*provider)
 	if err != nil {
 		return nil, err

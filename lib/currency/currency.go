@@ -63,15 +63,6 @@ func refreshRates(baseCurrency string) (map[string]float64, error) {
 	return rates.Rates, nil
 }
 
-func ConvertFromUSD(cents int, currency models.Currency) (int, error) {
-	// Skip conversion if it's already in USD
-	if currency == models.CurrencyUsd {
-		return cents, nil
-	}
-
-	return exchanger.exchange(cents, "USD", currency)
-}
-
 func Convert(cents int, from models.Currency, to models.Currency) (int, error) {
 	if from == to {
 		return cents, nil
