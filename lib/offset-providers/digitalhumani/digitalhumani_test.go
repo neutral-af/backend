@@ -156,6 +156,27 @@ func TestPurchaseError(t *testing.T) {
 	assert.Nil(t, resp)
 }
 
+func TestPurchaseErrorStatus(t *testing.T) {
+	defer gock.Off()
+
+	c := New()
+	c.baseURL = mockURL
+
+	gock.New(mockURL).
+		Post("/tree").
+		Reply(500).
+		BodyString(`{}`)
+
+	carbon := 2000
+	estimate := models.EstimateIn{
+		Carbon: &carbon,
+	}
+
+	resp, err := c.Purchase(estimate)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
+
 func TestPurchaseInvalid(t *testing.T) {
 	defer gock.Off()
 
