@@ -12,32 +12,12 @@ import (
 	"github.com/neutral-af/backend/lib/flightstats"
 	models "github.com/neutral-af/backend/lib/graphql-models"
 	providers "github.com/neutral-af/backend/lib/offset-providers"
-	"github.com/neutral-af/backend/lib/offset-providers/cloverly"
-	"github.com/neutral-af/backend/lib/offset-providers/digitalhumani"
 )
 
-var cloverlyAPI cloverly.Cloverly
-var digitalHumaniAPI digitalhumani.DigitalHumani
 var flightStatsAPI flightstats.FlightStats
 
 func init() {
-	cloverlyAPI = cloverly.New()
-	digitalHumaniAPI = digitalhumani.New()
 	flightStatsAPI = flightstats.New()
-}
-
-func getProviderAPI(p models.Provider) (providers.Provider, error) {
-	var provider providers.Provider
-	switch p {
-	case models.ProviderCloverly:
-		provider = &cloverlyAPI
-	case models.ProviderDigitalHumani:
-		provider = &digitalHumaniAPI
-	default:
-		return nil, errors.New("Provider unknown or not set")
-	}
-
-	return provider, nil
 }
 
 type getEstimateResolver struct{ *Resolver }
@@ -89,7 +69,7 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 	beeline.AddField(ctx, "provider", *options.Provider)
 	beeline.AddField(ctx, "carbon", totalCarbon)
 
-	provider, err := getProviderAPI(*options.Provider)
+	provider, err := providers.GetProviderAPI(*options.Provider)
 	if err != nil {
 		return nil, err
 	}
@@ -108,14 +88,15 @@ func (r *getEstimateResolver) FromFlights(ctx context.Context, get *models.GetEs
 }
 
 func (r *getEstimateResolver) FromID(ctx context.Context, get *models.GetEstimate, id *string, provider *models.Provider) (*models.Estimate, error) {
-	if *provider == models.ProviderCloverly {
-		estimate, err := cloverlyAPI.RetrieveEstimate(*id)
-		if err != nil {
-			return nil, err
-		}
-
-		return estimate, nil
+	p, err := providers.GetProviderAPI(*provider)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("Cannot retrieve estimate for given provider")
+	estimate, err := p.RetrieveEstimate(*id)
+	if err != nil {
+		return nil, err
+	}
+
+	return estimate, nil
 }

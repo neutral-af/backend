@@ -1,5 +1,5 @@
 type PaymentActions {
-    checkout(estimate: EstimateIn!, paymentMethod: String!, amount: Int!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
+    checkout(estimate: EstimateIn!, paymentMethod: String!, currency: Currency!, options: PaymentOptions = {}): PaymentResponse
     confirm(estimate: EstimateIn!, paymentIntent: String!, options: PaymentOptions = {}): PaymentResponse
 }
 

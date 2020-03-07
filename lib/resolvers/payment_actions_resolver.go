@@ -5,21 +5,32 @@ import (
 
 	"github.com/honeycombio/beeline-go"
 	models "github.com/neutral-af/backend/lib/graphql-models"
+	providers "github.com/neutral-af/backend/lib/offset-providers"
 	"github.com/neutral-af/backend/lib/payments"
 )
 
 type paymentActionsResolver struct{ *Resolver }
 
-func (r *paymentActionsResolver) Checkout(ctx context.Context, pa *models.PaymentActions, estimate models.EstimateIn, paymentMethod string, amount int, currency models.Currency, opts *models.PaymentOptions) (*models.PaymentResponse, error) {
+func (r *paymentActionsResolver) Checkout(ctx context.Context, pa *models.PaymentActions, estimateIn models.EstimateIn, paymentMethod string, currency models.Currency, opts *models.PaymentOptions) (*models.PaymentResponse, error) {
 	ctx, span := beeline.StartSpan(ctx, "checkout")
 	defer span.Send()
 
-	response, err := payments.Checkout(paymentMethod, amount, currency, opts)
+	provider, err := providers.GetProviderAPI(*estimateIn.Options.Provider)
 	if err != nil {
 		return nil, err
 	}
 
-	return purchaseIfReady(ctx, response, estimate)
+	estimate, err := provider.RetrieveEstimate(*estimateIn.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := payments.Checkout(paymentMethod, estimate.Price.Cents, currency, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return purchaseIfReady(ctx, response, estimateIn)
 }
 
 func (r *paymentActionsResolver) Confirm(ctx context.Context, pa *models.PaymentActions, estimate models.EstimateIn, paymentIntent string, opts *models.PaymentOptions) (*models.PaymentResponse, error) {
@@ -43,7 +54,7 @@ func purchaseIfReady(ctx context.Context, response *models.PaymentResponse, esti
 		return response, nil
 	}
 
-	provider, err := getProviderAPI(*estimate.Options.Provider)
+	provider, err := providers.GetProviderAPI(*estimate.Options.Provider)
 	if err != nil {
 		return nil, err
 	}
