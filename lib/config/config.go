@@ -61,6 +61,7 @@ func New() config {
 
 	viper.BindEnv("CLOVERLY_API_KEY")
 	viper.BindEnv("DIGITALHUMANI_ENTERPRISE_ID")
+	viper.BindEnv("DIGITALHUMANI_API_KEY")
 	viper.BindEnv("HONEYCOMB_API_KEY")
 	viper.BindEnv("STRIPE_SECRET_KEY")
 	viper.BindEnv("FLIGHTSTATS_APP_ID")
